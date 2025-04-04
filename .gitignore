@@ -83,3 +83,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Data files
+*.Rds
+
+# Rendered html files
+*.html
