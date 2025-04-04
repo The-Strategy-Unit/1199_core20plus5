@@ -85,4 +85,4 @@ env.bak/
 venv.bak/
 
 # Data files
-.Rds
+*.Rds
