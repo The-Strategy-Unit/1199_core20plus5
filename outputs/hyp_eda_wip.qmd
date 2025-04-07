@@ -6,6 +6,8 @@ date: today
 
 title-block-banner: '#151412'
 params:
+  # should expensive calculations be re-calculated?
+  # default = FALSE. Set to TRUE if running for the first time
   flag_calc_expensive_operations: FALSE
 format:
   html:
@@ -106,6 +108,37 @@ df_metrics_icb <-
 icb_sf <- sf::read_sf("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Integrated_Care_Boards_April_2023_EN_BSC/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson")
 icb_sf <- icb_sf |> sf::st_simplify()
 
+# icb data ---
+# list focal icbs
+
+#' Region	ICS
+#' London       
+#'    North Central London
+#'    North East London
+#' South West
+#'    Bristol, North Somerset and South Gloucestershire
+#'    Cornwall and the Isles of Scilly
+#' North East and Yorkshire	  
+#'    Humber and North Yorkshire
+#'    North East and North Cumbria
+#' East of England
+#'    Bedfordshire, Luton and Milton Keynes
+#'    Mid and South Essex
+#' South East	
+#'    Buckinghamshire, Oxfordshire and Berkshire West
+#'    Hampshire and the Isle of Wight
+#' North West	
+#'    Lancashire and South Cumbria
+#' Midlands	
+#'    Black Country
+#'    Herefordshire and Worcestershire
+#'    Nottingham and Nottinghamshire
+
+df_icb_focal <- readxl::read_xlsx(
+  path = here::here('data', 'project', 'focal_icbs.xlsx'),
+  sheet = 'focal_icbs'
+)
+
 # process data -----------------------------------------------------------
 
 
@@ -159,28 +192,7 @@ df_dep_icb <-
 
 # custom functions -------------------------------------------------------
 source(here::here('scripts', 'report_functions.R'))
-# # plotly configuration
-# plotly_font_family <- list(family = 'Arial, Helvetica, Droid Sans, sans')
-# 
-# configure_plotly <- function(p) {
-#   p <-
-#     p |> 
-#     plotly::config(
-#     displaylogo = FALSE,
-#     modeBarButtons = list(list('toImage')),
-#     toImageButtonOptions = list(
-#       'format' = 'svg',
-#       'filename' = glue::glue(
-#         "core20plus5_", # name for this plot
-#         "{strftime(Sys.time(), '%Y%m%d_%H%M%S')}") # datetime
-#     )
-#   )
-#   
-#   return(p)
-# }
-# 
-# crude_rate_range <- colorRampPalette(c("#abc0e0", "#5881c1"))
-# age_adj_range <- colorRampPalette(c("#fcdf83", "#f9bf07"))
+
 ```
 
 # Introduction
@@ -388,6 +400,26 @@ A minimum of three data points in the pre- and post-intervention period for ITS 
 output_metric_meta(.indicator_code = 'CVDP009HYP')
 ```
 :::
+
+## Focal ICBs
+
+Special focus will be given to fourteen ICBs, called the focal ICBs, which have been selected as case studies. These ICBs are:
+
+```{r}
+#| fig-cap: Focal ICBs
+
+df_icb_focal |>
+  dplyr::group_by(nhs_region) |> 
+  gt::gt(row_group_as_column = TRUE) |> 
+  gt::tab_options(quarto.disable_processing = TRUE) |> 
+  gt::tab_stubhead(label = "NHS Region") |> 
+  gt::cols_label(
+    area_code = "ICB Code",
+    area_name = "ICB Name"
+  )
+```
+
+Along with national trends we explore the performance of these fourteen ICBs in particular throughout this analysis.
 
 # Analysis
 
@@ -1511,6 +1543,12 @@ if (params$flag_calc_expensive_operations) {
 }
 ```
 
+This map shows the SII in each time point for the 42 ICBs in England.
+
+The colours are scaled to represent the level of inequality, ranging from yellow (0 SII) which represents equality across deprivation quintiles, to dark red (-12 SII) which represents a 12% difference between most and least deprived quintiles in the ICB.
+
+Click on the radio buttons on the right-hand side of the map to see the results at different time periods.
+
 ```{r}
 #| fig-height: 7
 #| fig-cap: Geographical distribution of SII using age-standardised hypertension prevalence
@@ -1550,6 +1588,12 @@ df_sii <-
       "{time_period_name_f}</br>",
       "<strong>Slope Index of Inequality:</strong> {round(estimate, digits = 1)}%</br>",
       "<strong>95% Confidence Interval:</strong> {round(lowerci, digits = 1)}% to {round(upperci, digits = 1)}%"
+    ),
+    hover_label_plotly = glue::glue(
+      "<b>{area_name}</b>\n",
+      "{time_period_name_f}\n",
+      "<b>Slope Index of Inequality:</b> {round(estimate, digits = 1)}%\n",
+      "<b>95% Confidence Interval:</b> {round(lowerci, digits = 1)}% to {round(upperci, digits = 1)}%"
     )
   )
 
@@ -1593,6 +1637,41 @@ icb_sf |>
     #labels = bins
   )
 ```
+
+The trend for greater inequality is represented by increasing numbers of ICBs turning from yellow to orange and red colours as you move down the different time periods, particularly noticeable in movement from March 2024 to June 2024.
+
+Not all ICBs move in the same direction, however. One example is Birmingham and Solihull ICB which starts the series in March 2023 with a deep red colour (-12% SII) in contrast with the surrounding ICBs yellow and orange hues. Over time this ICB reduces inequality resulting in a mid-orange (-9.3% SII) by September 2024.
+
+Some ICBs retain relatively static levels of inequality. An example is Cornwall and the Isles of Scilly ICB which starts in March 2023 with -2.3% SII, one of more equal ICBs by deprivation, which ends the series in September 2024 with -2.0% SII having undergone very little change over the time period.
+
+#### Focal ICBs
+
+This chart shows the SII metric over successive time periods across our fourteen focal ICBs using age-standardised hypertension prevalence.
+
+```{r}
+#| fig-height: 60
+#| fig-cap: Trend in inequality (SII) of age-standardised hypertension prevalence for the focal ICBs
+ 
+# produce a facet/subplot timeseries plots for each ICB
+plot_list <- 
+  plot_focal_scheme_sii_timeseries(
+    .df_sii = df_sii,
+    .df_icb_focal = df_icb_focal
+  )
+
+# display the plot
+plot_list
+```
+
+Most ICBs maintain relatively stable metrics of inequality (SII) over this time period.
+
+Some ICBs show signs of increasing inequality, such as `NHS Hampshire and Isle of Wight ICB` which had one of the most equal deprivation scores until March 2024 (-2.4% SII) after which inequality appears to have increased to -4.6% SII, putting the ICB within the middle of the pack.
+
+Examples of improved equality are rarer but still visible in this set:
+
+-   `NHS Cornwall and the Isles of Scilly` which improved from -2.3% in March 2023 to -2% in September 2024,
+
+-   `NHS North Central London ICB` which improved from -8.7% in March 2023 to -8.3% in September 2024.
 
 ## CVDP002HYP
 
@@ -2336,6 +2415,12 @@ df_sii <-
       "{time_period_name_f}</br>",
       "<strong>Slope Index of Inequality:</strong> {round(estimate, digits = 1)}%</br>",
       "<strong>95% Confidence Interval:</strong> {round(lowerci, digits = 1)}% to {round(upperci, digits = 1)}%"
+    ),
+    hover_label_plotly = glue::glue(
+      "<b>{area_name}</b>\n",
+      "{time_period_name_f}\n",
+      "<b>Slope Index of Inequality:</b> {round(estimate, digits = 1)}%\n",
+      "<b>95% Confidence Interval:</b> {round(lowerci, digits = 1)}% to {round(upperci, digits = 1)}%"
     )
   )
 
@@ -2400,6 +2485,23 @@ The majority of ICBs appear to be coloured various shades of blue, indicating th
 By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue, indicating greater inequity of access for people living in areas of highest deprivation.
 
 In June 2024 and September 2024 the darker blue is replaced by more lighter shades indicating that inequity still exists but to a lesser extent than the peak of March 2023.
+
+#### Focal ICBs
+
+```{r}
+#| fig-height: 60
+#| fig-cap: Trend in inequality (SII) of crude rates of treatment to threshold for the focal ICBs
+ 
+# produce a facet/subplot timeseries plots for each ICB
+plot_list <- 
+  plot_focal_scheme_sii_timeseries(
+    .df_sii = df_sii,
+    .df_icb_focal = df_icb_focal
+  )
+
+# display the plot
+plot_list
+```
 
 ## CVDP003HYP
 
