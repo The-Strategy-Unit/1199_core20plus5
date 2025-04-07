@@ -1,7 +1,7 @@
 ---
 title: "Hypertension metrics"
 subtitle: "Exploring metrics related to hypertension as reported in the CVDPREVENT audit in support of an evaluation of Core20PLUS5"
-author: "Craig Parylo"
+author: "Craig Parylo & Fikriyudin Mufasir"
 date: today
 
 title-block-banner: '#151412'
