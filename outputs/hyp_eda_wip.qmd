@@ -2857,7 +2857,7 @@ df |>
 
 ```{r}
 #| fig-height: 6
-#| fig-cap: Trend in inequality (SII) of crude hypertension prevalence
+#| fig-cap: Trend in inequality (SII) of crude rates of treatment to threshold (80+ yrs)
 
 # get the latest reporting period
 df <-
