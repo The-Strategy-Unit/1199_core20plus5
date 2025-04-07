@@ -2563,7 +2563,7 @@ df <-
 # plot the result
 df |> 
   plot_timeseries(
-    plot_title = "England hypertension treated to threshold 80+ yrs (CVDP002HYP) - broad ethnic group",
+    plot_title = "England hypertension treated to threshold 80+ yrs (CVDP003HYP) - broad ethnic group",
     y_axis_title = "People with hypertension treated to threshold\n(percent)"
   )
 ```
@@ -2600,7 +2600,7 @@ df <-
 # plot the result
 df |> 
   plot_timeseries(
-    plot_title = "England hypertension treated to threshold 80+ yrs (CVDP002HYP) - deprivation",
+    plot_title = "England hypertension treated to threshold 80+ yrs (CVDP003HYP) - deprivation",
     y_axis_title = "People with hypertension treated to threshold\n(percent)"
   )
 ```
@@ -2637,7 +2637,7 @@ df <-
 # plot the result
 df |> 
   plot_timeseries(
-    plot_title = "England hypertension treated to threshold 80+ yrs (CVDP002HYP) - SMI",
+    plot_title = "England hypertension treated to threshold 80+ yrs (CVDP003HYP) - SMI",
     y_axis_title = "People with hypertension treated to threshold\n(percent)"
   )
 ```
@@ -2674,7 +2674,7 @@ df <-
 # plot the result
 df |> 
   plot_timeseries(
-    plot_title = "England hypertension treated to threshold 80+ yrs (CVDP002HYP) - LD",
+    plot_title = "England hypertension treated to threshold 80+ yrs (CVDP003HYP) - LD",
     y_axis_title = "People with hypertension treated to threshold\n(percent)"
   )
 ```
@@ -2704,7 +2704,7 @@ df_metrics_icb |>
     marker = list(color = "#abc0e0")
   ) |> 
   plotly::layout(
-    title = "ICB distribution - hypertension treated to threshold 80+ yrs (CVDP002HYP)",
+    title = "ICB distribution - hypertension treated to threshold 80+ yrs (CVDP003HYP)",
     font = plotly_font_family,
     xaxis = list(
       title = "People with hypertension treated to threshold (percent)", 
@@ -2714,3 +2714,369 @@ df_metrics_icb |>
   ) |> 
   configure_plotly()
 ```
+
+### Deprivation breakdowns
+
+```{r}
+#| fig-height: 7
+
+# prepare the metric data
+df_dep_icb |> 
+  dplyr::filter(
+    indicator_code == 'CVDP003HYP',
+    metric_category_type_name == 'Deprivation quintile'
+  ) |> 
+  dplyr::mutate(
+    time_period_name_f = time_period_name_f |> forcats::fct_drop()
+  ) |> 
+  plotly::plot_ly(
+    x = ~ value,
+    y = ~ deprivation,
+    frame = ~ time_period_name_f,
+    type = "box",
+    fillcolor = adjustcolor("#abc0e0", alpha.f = 0.5),
+    line = list(color = "#abc0e0"),
+    marker = list(color = "#abc0e0")
+  ) |> 
+  plotly::layout(
+    title = "ICB distribution - hypertension treated to threshold > 80 yrs (CVDP003HYP)",
+    font = plotly_font_family,
+    xaxis = list(title = "Treated to threshold (percent)")
+  ) |> 
+  plotly::animation_slider(
+    currentvalue = list(prefix = "", font = list(color = "black"))  
+  ) |> 
+  configure_plotly()
+```
+
+::: callout-note
+#### Date limits
+
+ICBs were established in the summer of 2022, replacing previous system of CCGs. As a result ICB-level data is only available from June 2022 onwards from the CVDPREVENT audit data, though it *may* be possible to construct ICB-level equivalent data based on CCG footprints to get data older than June 2022.
+
+The decision whether to proceed with this rests on whether the additional back-dated data will be helpful in conducting the impact evaluation using techniques such as interrupted time-series analysis.
+:::
+
+### Slope Index of Inequality
+
+The Slope Index of Inequality (SII) is a statistical measure used to assess health disparities and socio-economic inequalities within a population.
+
+It quantifies the relationship between a health outcome and a socio-economic variable, such as deprivation, by examining how the health outcome varies across different socio-economic groups.
+
+The SII is particularly valuable because it provides a comprehensive view of inequality by considering the entire distribution of the socio-economic variable, rather than just comparing specific groups.
+
+To appreciate how the SII applies to this measure here is an example slope as calculated from the latest reporting time period:
+
+```{r}
+#| fig-height: 6
+#| fig-cap: Inequality of crude rate of treatment to threshold (>80 years) by deprivation quintile - example month
+
+# get the latest reporting period
+df <-
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::filter(
+    indicator_code == "CVDP003HYP",
+    metric_category_type_name == "Deprivation quintile"
+  ) |> 
+  dplyr::mutate(
+    subgroup_order = as.numeric(deprivation),
+    deprivation_text = glue::glue(
+      "Deprivation quintile {as.numeric(deprivation)}"
+    ),
+    text = glue::glue(
+      "<b>{deprivation_text}</b>\n",
+      "{time_period_name}\n",
+      "Prevalence: {round(value, digits = 1)}% ",
+      "(95% CI: {round(lower_confidence_limit, digits = 2)}% to {round(upper_confidence_limit, digits = 2)}%)"
+    )
+  ) |> 
+  dplyr::arrange(subgroup_order)
+
+# calculate the sii
+df_sii <-
+  df |> 
+  dplyr::summarise(
+    sii = healthequal::sii(
+      est = value,
+      pop = denominator,
+      subgroup_order = subgroup_order
+    )
+  ) |> 
+  tidyr::unnest(sii)
+
+# fit a lm for the linear regression
+fit <- lm(value ~ as.numeric(deprivation), data = df)
+
+# plot values by deprivation and simulate sii
+df |> 
+  plotly::plot_ly(
+    x = ~ deprivation
+  ) |> 
+  plotly::add_segments(
+    name = "95% Confidence Interval",
+    x = ~ deprivation, xend = ~ deprivation,
+    y = ~ lower_confidence_limit, yend = ~ upper_confidence_limit,
+    line = list(color = adjustcolor("#abc0e0", alpha.f = 0.3), width = 5),
+    hovertemplate = ""
+  ) |> 
+  plotly::add_trace(
+    name = "Rate",
+    y = ~ value,
+    type = "scatter",
+    mode = "markers",
+    marker = list(size = 10, color = "#abc0e0"),
+    hovertemplate = ~ text
+  ) |> 
+  plotly::add_trace(
+    name = "SII",
+    y = fitted(fit),
+    type = "scatter",
+    mode = "lines",
+    line = list(color = "#abc0e0", dash = "dot"),
+    hovertemplate = glue::glue("SII: {fitted(fit)}")
+  ) |> 
+  plotly::add_annotations(
+    x = ~ 3,
+    y = ~ 55,
+    text = glue::glue("<b>Slope Index of Inequality</b>\n{round(df_sii$estimate, digits = 1)}%"),
+    showarrow = FALSE
+  ) |> 
+  plotly::layout(
+    title = "Crude hypertension prevalence - September 2024",
+    font = plotly_font_family,
+    legend = list(orientation = "h"),
+    xaxis = list(title = ""),
+    yaxis = list(
+      title = "People with hypertension treated to threshold (>80 yrs)\n(percent)",
+      rangemode = "tozero"
+    )
+  ) |> 
+  configure_plotly()
+```
+
+```{r}
+#| fig-height: 6
+#| fig-cap: Trend in inequality (SII) of crude hypertension prevalence
+
+# get the latest reporting period
+df <-
+  df_dep_eng |> 
+  dplyr::filter(
+    indicator_code == "CVDP003HYP",
+    metric_category_type_name == "Deprivation quintile"
+  ) |> 
+  dplyr::mutate(subgroup_order = as.numeric(deprivation)) |> 
+  dplyr::summarise(
+    sii = healthequal::sii(
+      est = value,
+      subgroup_order = subgroup_order,
+      weight = denominator
+    ),
+    .by = c(time_period_month, time_period_name_f)
+  ) |> 
+  tidyr::unnest(sii) |> 
+  dplyr::mutate(
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "Slope Index of Inequality: {round(estimate, digits = 1)}\n",
+      "95% Confidence Interval: {round(lowerci, digits = 1)} to {round(upperci, digits = 1)}"
+    )
+  )
+    
+# plot the sii over time
+df |> 
+  plotly::plot_ly(
+    x = ~ time_period_month
+  ) |> 
+  plotly::add_trace(
+    name = "Upper CI",
+    y = ~ upperci,
+    type = "scatter",
+    mode = "lines",
+    line = list(color = "transparent"),
+    hoverinfo = "skip"
+  ) |> 
+  plotly::add_trace(
+    name = "Lower CI",
+    y = ~ lowerci,
+    type = "scatter",
+    mode = "lines",
+    fill = "tonexty",
+    fillcolor = adjustcolor("#abc0e0", alpha.f = 0.2),
+    line = list(color = "transparent"),
+    hoverinfo = "skip"
+  ) |> 
+  plotly::add_trace(
+    name = "SII",
+    y = ~ estimate,
+    type = "scatter",
+    mode = "lines+markers",
+    hovertemplate = ~ text,
+    line = list(color = "#abc0e0"),
+    marker = list(color = "#abc0e0")
+  ) |> 
+  plotly::layout(
+    title = "Slope Index of Inequality (SII) timeseries",
+    font = plotly_font_family,
+    showlegend = FALSE,
+    yaxis = list(
+      title = "Slope Index of Inequality (SII)\n(Closer to zero is better)", 
+      showgrid = FALSE, showline = FALSE, 
+      rangemode = "tozero"
+    ),
+    xaxis = list(title = "", showgrid = FALSE, showline = FALSE)
+  ) |> 
+  configure_plotly()
+```
+
+There was a general trend of fluctuation inequality overtime. an increase was observed between March 2020 and March 2021, from 0.6% to 2% but afterwards there is a reduction in inequality to 0.6% in March 2022.
+
+The percentage begin to increase again between June 2022 and March 2024 (0.6% to 1.6%).
+
+There were two points of exceptions, a sharp fall after reached high percentage in inequality in March 2021 and March 2024.
+
+The confidence intervals are much tighter in this plot than those seen in the age-standardised hypertension prevalence (see @sec-age-standardised-prevalence), indicating there is much less uncertainty about these SII estimates.
+
+### Geography
+
+```{r}
+# expensive operation - process only if required
+if (params$flag_calc_expensive_operations) {
+  # prepare the data
+  df_dep_icb_sii <-
+    df_dep_icb |> 
+    dplyr::filter(
+      indicator_code == "CVDP003HYP",
+      metric_category_type_name == "Deprivation quintile"
+    ) |> 
+    # continue with wrangling
+    dplyr::mutate(subgroup_order = as.numeric(deprivation)) |> 
+    dplyr::summarise(
+      sii = healthequal::sii(
+        est = value,
+        subgroup_order = subgroup_order,
+        weight = denominator
+      ),
+      .by = c(time_period_month, time_period_name_f, area_code)
+    ) |> 
+    tidyr::unnest(sii) |> 
+    dplyr::mutate(
+      text = glue::glue(
+        "<b>{time_period_name_f}</b>\n",
+        "Slope Index of Inequality: {round(estimate, digits = 1)}\n",
+        "95% Confidence Interval: {round(lowerci, digits = 1)} to {round(upperci, digits = 1)}"
+      )
+    )
+  
+  # store for later use (this is an expensive operation)
+  saveRDS(
+    object = df_dep_icb_sii,
+    file = here::here('data', 'project', 'df_dep_icb_sii_p003.Rds')
+  )
+}
+```
+
+```{r}
+#| fig-height: 7
+#| fig-cap: Geographical distribution of SII using crude rates of people with hypertension treated to threshold (>80 yrs)
+
+# wrangling ---
+
+# read the pre-processed icb sii file
+df_sii <-
+  readRDS(
+    file = here::here('data', 'project', 'df_dep_icb_sii_p003.Rds')
+  ) |> 
+  # sort by area code
+  dplyr::arrange(area_code, time_period_name_f) |> 
+  # add in ICB name
+  dplyr::left_join(
+    y = icb_sf |> 
+      dplyr::select(
+        ICB23CD,
+        area_name = ICB23NM
+      ) |> 
+      # shorten the ICB name a little
+      dplyr::mutate(
+        area_name = area_name |> 
+          stringr::str_replace(
+            pattern = "Integrated Care Board",
+            replacement = "ICB"
+          )
+      ),
+    by = dplyr::join_by(
+      area_code == ICB23CD
+    )
+  ) |> 
+  # prepare the hover text info
+  dplyr::mutate(
+    hover_label = glue::glue(
+      "<strong>{area_name}</strong></br>",
+      "{time_period_name_f}</br>",
+      "<strong>Slope Index of Inequality:</strong> {round(estimate, digits = 1)}%</br>",
+      "<strong>95% Confidence Interval:</strong> {round(lowerci, digits = 1)}% to {round(upperci, digits = 1)}%"
+    )
+  )
+
+# define the colour palette for the choropleth
+pal <- leaflet::colorNumeric(
+  palette = "RdYlBu",
+  # use a balanced set to ensure zero is the mid-point
+  domain = seq(
+    from = ceiling(max(abs(df_sii$estimate)))*-1,
+    to = ceiling(max(abs(df_sii$estimate))),
+    by = 1
+  ),
+  reverse = FALSE
+)
+
+# define a vector to list the layers
+poly_layers <- c()
+
+# leaflet map ---
+
+# build the map
+icb_sf |> 
+  leaflet::leaflet() |> 
+  add_leaflet_polygon(report_period = "To June 2022") |>
+  add_leaflet_polygon(report_period = "To September 2022") |>
+  add_leaflet_polygon(report_period = "To December 2022") |>
+  add_leaflet_polygon(report_period = "To March 2023") |> 
+  add_leaflet_polygon(report_period = "To June 2023") |> 
+  add_leaflet_polygon(report_period = "To September 2023") |> 
+  add_leaflet_polygon(report_period = "To December 2023") |> 
+  add_leaflet_polygon(report_period = "To March 2024") |> 
+  add_leaflet_polygon(report_period = "To June 2024") |>
+  add_leaflet_polygon(report_period = "To September 2024") |> 
+  leaflet::addLayersControl(
+    baseGroups = poly_layers,
+    options = leaflet::layersControlOptions(collapsed = FALSE)
+  ) |> 
+  leaflet::addLegend(
+    pal = pal,
+    values = df_sii$estimate,
+    opacity = 0.7,
+    title = "Key (%)",
+    position = "bottomleft",
+    labels = bins
+  )
+```
+
+This map presents a the SII for each ICB as a snapshot by each reporting period. The colours range from red-yellow-blue, where generally:
+
+-   red means a negative SII, which is where people with hypertension who live in areas of greater deprivation have higher rates of treatment to threshold,
+
+-   yellow means an SII equal to or around zero, which means greater equity of treatment to threshold with respect to deprivation, and
+
+-   blue means a positive SII, which is the area typically thought of as inequity of access where those who live in areas of highest deprivation have the lowest rates of treatment to threshold.
+
+In June 2022 there is one ICB with a strong red colour, Birmingham and Solihull ICB, indicating higher deprivation correlates with higher rates of treatment to threshold.
+
+A small number of ICBs have yellow/orange colours signifying more or less equality of access.
+
+The majority of ICBs appear to be coloured various shades of blue, indicating they have inequity in which those who live in areas of higher deprivation have lower rates of treatment to threshold.
+
+By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue, indicating greater inequity of access for people living in areas of highest deprivation.
+
+In June 2024 and September 2024 the darker blue is replaced by more yellow/orange indicating that inequity is getting worse than the peak of March 2023.
