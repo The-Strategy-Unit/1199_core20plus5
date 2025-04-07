@@ -227,6 +227,178 @@ plot_timeseries_single <- function(
   return(plot)
 }
 
+plot_focal_scheme_sii_timeseries <- function(
+    .df_sii,
+    .df_icb_focal
+  ) {
+  # iterate over the focal icbs and generate a plotly::subplot
+  
+  # setup ---
+  # define colours for the traces
+  su_background_colour <- StrategyUnitTheme::su_theme_cols("light_charcoal")
+  su_focal_colour <- StrategyUnitTheme::su_theme_cols("orange")
+  su_focal_colour_line <- StrategyUnitTheme::su_theme_cols("light_orange")
+  
+  # data prep ---
+  # limit df_sii to just the focal schemes
+  df_focal <- 
+    .df_sii |> 
+    dplyr::filter(area_code %in% .df_icb_focal$area_code)
+  
+  # get a base time-series plot with all icbs as feint grey traces
+  plot_base <-
+    df_focal |> 
+    plotly::plot_ly(
+      x = ~ time_period_month
+    ) |> 
+    plotly::add_trace(
+      name = "All ICBs",
+      y = ~ estimate,
+      type = "scatter",
+      mode = "lines",
+      hoverinfo = "skip",
+      line = list(color = su_background_colour, width = 0.5),
+      opacity = 0.5
+    )
+  
+  # order icbs by their 'average' sii
+  df_focal_ordered <-
+    df_focal |> 
+    dplyr::summarise(
+      average_sii = estimate |> 
+        mean(na.rm = TRUE) |> 
+        abs(),
+      .by = area_code
+    ) |> 
+    dplyr::arrange(average_sii)
+  
+  # iterate over these icbs and generate charts
+  plot_list <-
+    purrr::map(
+      .x = df_focal_ordered$area_code,
+      .f = \(.x) plot_focal_scheme_sii_timeseries_single(
+        .icb = .x,
+        .plot_base = plot_base,
+        .df_focal = df_focal,
+        .col_marker = su_focal_colour,
+        .col_line = su_focal_colour_line
+      )
+    )
+  
+  plot <- 
+    plotly::subplot(
+      plot_list,
+      nrows = length(plot_list),
+      # add spacing between plots to allow for facet titles
+      # needs scaling in proportion to number of facets
+      margin = c(
+        0, 0,
+        0.1 * (1 / length(plot_list)),
+        0.1 * (1 / length(plot_list))
+      ), # l, r, t, b
+      shareY = TRUE, 
+      shareX = FALSE
+    ) |> 
+    configure_plotly()
+  
+  # combine these charts into a subplot
+  #`return(plot_list)
+  return(plot)
+  
+}
+
+plot_focal_scheme_sii_timeseries_single <- function(
+    .icb,
+    .plot_base,
+    .df_focal,
+    .col_marker,
+    .col_line
+  ) {
+  # create a single chart to be included in the subplot
+  
+  # setup ---
+  
+  # filter data for the specified icb
+  df_icb <-
+    .df_focal |> 
+    dplyr::filter(area_code == .icb)
+  
+  # create a plot for the specified icb
+  plot <-
+    .plot_base |> 
+    plotly::add_trace(
+      data = df_icb,
+      name = "SII",
+      y = ~ estimate,
+      type = "scatter",
+      mode = "lines"
+    ) |> 
+    # add the name of the ICB
+    plotly::add_annotations(
+      text = ~ area_name,
+      x = 0.5,
+      y = 1,
+      yref = "paper",
+      xref = "paper",
+      xanchor = "center",
+      yanchor = "top",
+      showarrow = FALSE,
+      font = list(size = 15)
+    ) |> 
+    # add confidence interval
+    plotly::add_trace(
+      data = df_icb,
+      name = "Upper CI",
+      y = ~ upperci,
+      type = "scatter",
+      mode = "lines",
+      line = list(color = "transparent"),
+      hoverinfo = "skip"
+    ) |> 
+    plotly::add_trace(
+      data = df_icb,
+      name = "Lower CI",
+      y = ~ lowerci,
+      type = "scatter",
+      mode = "lines",
+      fill = "tonexty",
+      fillcolor = adjustcolor(col = .col_marker, alpha.f = 0.2),
+      line = list(color = "transparent"),
+      hoverinfo = "skip"
+    ) |> 
+    # add the lines
+    plotly::add_trace(
+      data = df_icb,
+      name = "SII",
+      y = ~ estimate,
+      type = "scatter",
+      mode = "lines",
+      line = list(color = .col_line, width = 5),
+      hoverinfo = "skip"
+    ) |>
+    # add the markers
+    plotly::add_trace(
+      data = df_icb,
+      name = "SII",
+      y = ~ estimate,
+      type = "scatter",
+      mode = "markers",
+      marker = list(color = .col_marker),
+      hovertemplate = ~ hover_label_plotly
+    ) |> 
+    plotly::layout(
+      title = "Slope Index of Inequality (SII) timeseries - focal ICBs",
+      font = plotly_font_family,
+      showlegend = FALSE,
+      yaxis = list(
+        title = "Slope Index of Inequality (SII)\n(Closer to zero is better)", 
+        showgrid = FALSE, showline = FALSE, 
+        rangemode = "tozero"
+      ),
+      xaxis = list(title = "", showgrid = FALSE, showline = FALSE)
+    ) 
+}
+
 
 # leaflet ----------------------------------------------------------------------
 
