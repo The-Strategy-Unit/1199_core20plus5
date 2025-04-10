@@ -8,7 +8,7 @@ title-block-banner: '#151412'
 params:
   # should expensive calculations be re-calculated?
   # default = FALSE. Set to TRUE if running for the first time
-  flag_calc_expensive_operations: TRUE
+  flag_calc_expensive_operations: FALSE
 format:
   html:
     toc: true
@@ -4066,7 +4066,7 @@ The denominators for both groups are broadly similar in each reporting period, h
 
 ```{r}
 #| fig-height: 8
-#| fig-cap: Timeseries of the rate of people with a blood pressure reading record (recorded hypertension) in England by age group
+#| fig-cap: Timeseries of the rate of people with high risk – one high blood pressure (no recorded hypertension) in England by age group
 
 # prepare the data for plotting
 df <-
@@ -4099,7 +4099,10 @@ df |>
   )
 ```
 
-There is a clear pattern demonstrated here that as age-group increases so too does the likelihood for hypertension to be treated within limits.However, this relationship is not so nearly as strong as that observed between high risk – one high blood pressure (no recorded hypertension) and age group (see @sec-national-trends).
+
+The pattern demonstrated here is not the same as previous metric which indicated that as age-group increases so too does the likelihood for hypertension,with the highest rates for the 60-79 years group, followed by the second youngest (40-59), then by the oldest group (80+) finally by the youngest group (18-39). This high risk – one high blood pressure (no recorded hypertension) seems to be different from previous findings in age group (see @sec-national-trends).it seems to be that this outcome contain people with no recorded hypertension.
+
+
 
 Despite this small gap in high risk – one high blood pressure (no recorded hypertension) between the age groups, there are still notable differences in the denominators. In September 2024 the:
 
@@ -4115,7 +4118,7 @@ Use of the crude high risk – one high blood pressure (no recorded hypertension
 
 ```{r}
 #| fig-height: 8
-#| fig-cap: Timeseries of the rate of people with blood pressure reading record (recorded hypertension) in England by ethnicity
+#| fig-cap: Timeseries of the rate of people with high risk – one high blood pressure (no recorded hypertension) in England by ethnicity
 
 # prepare the data for plotting
 df <-
@@ -4154,7 +4157,7 @@ No available data
 
 ```{r}
 #| fig-height: 8
-#| fig-cap: Timeseries of the rate of people with a record of blood pressure reading (record hypertension) in England by deprivation quintile
+#| fig-cap: Timeseries of the rate of people with high risk – one high blood pressure (no recorded hypertension) in England by deprivation quintile
 
 # prepare the data for plotting
 df <-
@@ -4187,9 +4190,8 @@ df |>
   )
 ```
 
-There is a clear relationship between deprivation quintile and high risk – one high blood pressure with no recorded hypertension. People living in areas of higher deprivation consistently achieve lower rates of recorded blood pressure reading compared with those living in areas of least deprivation.
 
-Moreover, there appears to be a step-wise correlation between deprivation quintile and blood pressure reading records, with people living in areas of higher deprivation less likely to achieve recorded hypertention with a blood pressure records.
+The relationship between deprivation and igh risk – one high blood pressure with no recorded hypertension is more complex, for example the most deprived group does not consistently have the higher rate with Quitile 4 often being the highest. Similarly for Quntiles 5 and 2 for the lowest rates for this outcome.
 
 
 #### SMI
@@ -4431,7 +4433,7 @@ df |>
   ) |> 
   plotly::add_annotations(
     x = ~ 3,
-    y = ~ 55,
+    y = ~ 1.5,
     text = glue::glue("<b>Slope Index of Inequality</b>\n{round(df_sii$estimate, digits = 1)}%"),
     showarrow = FALSE
   ) |> 
