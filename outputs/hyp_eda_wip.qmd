@@ -3317,6 +3317,8 @@ By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue,
 
 In June 2024 and September 2024 the darker blue is replaced by more yellow/orange indicating that inequity is getting worse than the peak of March 2023.
 
+
+
 #### Focal ICBs
 
 ```{r}
@@ -3333,6 +3335,7 @@ plot_list <-
 # display the plot
 plot_list
 ```
+
 
 ## CVDP004HYP
 
@@ -4101,6 +4104,7 @@ The majority of ICBs appear to be coloured various shades of blue, indicating th
 By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue, indicating greater inequity of access for people living in areas of highest deprivation.
 
 In June 2024 and September 2024 the darker blue is replaced by more lighter shades indicating that inequity still exists but to a lesser extent than the peak of March 2023.
+
 
 #### Focal ICBs
 

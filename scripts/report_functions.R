@@ -505,12 +505,12 @@ plot_intersection_timeseries_single <- function(
   
   # plot colours
   plot_colours <- su_pal(n = df$series |> levels() |> length())
-  
+
   # annotations
   df_annotate <-
     df |>
     dplyr::slice_max(time_period_month)
-  
+
   # plot
   plot <-
     df |>
@@ -565,7 +565,7 @@ plot_intersection_timeseries_single <- function(
       ),
       showlegend = FALSE
     )
-  
+
   return(plot)
   
 }
