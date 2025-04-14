@@ -31,12 +31,12 @@
 get_metric_data_for_systemlevel <- function(
     .system_level_id = 7, # default to ICB-level data (ID = 7)
     .indicator_ids = c(11) # default to indicator 11 just to return some info
-  ) {
-
+) {
+  
   # list time periods with standard outcomes (id = 1)
   timeperiods_standard <-
     cvdprevent::cvd_time_period_list(indicator_type_id = 1)
-
+  
   # list time periods where the system level data is reported
   timeperiods <-
     cvdprevent::cvd_area_system_level_time_periods() |>
@@ -44,7 +44,7 @@ get_metric_data_for_systemlevel <- function(
       SystemLevelID == .system_level_id,
       TimePeriodID %in% timeperiods_standard$TimePeriodID
     )
-
+  
   # iterate over each time period and gather data
   df <-
     purrr::map_dfr(
@@ -55,7 +55,7 @@ get_metric_data_for_systemlevel <- function(
         .indicator_ids = .indicator_ids
       )
     )
-
+  
   # return the result
   return(df)
 }
@@ -72,9 +72,9 @@ get_metric_data_for_timeperiod <- function(
     .time_period_id,
     .system_level_id,
     .indicator_ids
-  ) {
-
-    # iterate over each indicator and gather metric data for the specified time period and system level
+) {
+  
+  # iterate over each indicator and gather metric data for the specified time period and system level
   df_return <-
     purrr::map_dfr(
       .x = .indicator_ids,
@@ -84,7 +84,7 @@ get_metric_data_for_timeperiod <- function(
         system_level_id = .system_level_id
       )
     )
-
+  
   # return the result
   return(df_return)
 }

@@ -106,8 +106,9 @@ df_metrics_icb <-
 # map data ---
 # icb shapefiles
 icb_sf <- sf::read_sf("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Integrated_Care_Boards_April_2023_EN_BSC/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson")
-icb_sf <- icb_sf |> sf::st_simplify()
-
+icb_sf <- icb_sf |> 
+  #sf::st_simplify(dTolerance = 1000) # 2000 m
+  rmapshaper::ms_simplify(keep = 0.05)
 # icb data ---
 # list focal icbs
 
@@ -678,6 +679,49 @@ plot <-
 
 plot
 ```
+
+#### Age ∩ Gender
+
+```{r}
+#| fig-height: 9
+#| fig-cap: Timeseries of hypertension prevalence in England by the intersection of age group and gender as measured by the crude prevalence
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP001HYP',
+    category_attribute != 'Persons', # get the overall value
+    metric_category_type_name %in% c('Age group')
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    # NB, dropping unused factor levels to ensure the colouring works
+    series = category_attribute |> forcats::fct_drop(),
+    facet = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series} <b>({metric_category_name})</b>\n",
+      "{round(value, digits = 1)}% prevalence\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+
+# plot
+plot_intersection_timeseries(
+  .df = df,
+  .y_axis_title = "Crude rate\n(percent)"
+)
+```
+
+Men within the age groups 18-39, 40-50 and 60-79 are likely to have higher prevalence of hypertension than women.
+
+This generality changes in the 80+ years group, however, where we observe that women are more likely than men to be hyptertensive.
 :::
 
 ### Distributions over time
@@ -1993,6 +2037,49 @@ df |>
 ```
 
 This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to achieve treatment to threshold than those without (70.1% vs 63.7%, September 2024).
+
+#### Age ∩ Gender
+
+```{r}
+#| fig-height: 9
+#| fig-cap: Timeseries of hypertension treated to threshold (<80 yrs) in England by the intersection of age group and gender
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP002HYP',
+    category_attribute != 'Persons', # get the overall value
+    metric_category_type_name %in% c('Age group')
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    # NB, dropping unused factor levels to ensure the colouring works
+    series = category_attribute |> forcats::fct_drop(),
+    facet = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series} <b>({metric_category_name})</b>\n",
+      "{round(value, digits = 1)}% treatment to threshold\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+
+# plot
+plot_intersection_timeseries(
+  .df = df,
+  .y_axis_title = "Crude rate\n(percent)"
+)
+```
+
+Women aged 18-39 and 40-59 are more likely to have their hypertension treated to threshold than men.
+
+Both genders appear to have similar likelihood of treatment to threshold in the 60-79 years group.
 :::
 
 ### Distributions over time
@@ -2780,6 +2867,47 @@ df |>
     y_axis_title = "People with hypertension treated to threshold\n(percent)"
   )
 ```
+
+#### Age ∩ Gender
+
+```{r}
+#| fig-height: 4
+#| fig-cap: Timeseries of treatment to threshold (80+ yrs) in England by the intersection of age group and gender
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP003HYP',
+    category_attribute != 'Persons', # get the overall value
+    metric_category_type_name %in% c('Age group')
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    # NB, dropping unused factor levels to ensure the colouring works
+    series = category_attribute |> forcats::fct_drop(),
+    facet = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series} <b>({metric_category_name})</b>\n",
+      "{round(value, digits = 1)}% treatment to threshold\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+
+# plot
+plot_intersection_timeseries(
+  .df = df,
+  .y_axis_title = "Crude rate\n(percent)"
+)
+```
+
+In this 80+ years age group men are more likely than women to have their hypertension treated to threshold.
 :::
 
 ### Distributions over time
@@ -3262,7 +3390,7 @@ df |>
   )
 ```
 
-The main point to note from this chart is that GP hypertension with a record of a blood pressure reading reached the highest percentage up to 88.7% of people aged 18+ were recorded over this period.
+The main point to note from this chart is that GP hypertension with a record of a blood pressure reading reached the highest percentage up to 88.7% of people aged 18 and over were recorded over this period.
 
 There is a dramatic fall in the rate between March 2020 and March 2021, where the proportion of people with recorded hypertension blood pressure reading fell from 88.7% to 63.5%.
 
@@ -3521,6 +3649,51 @@ df |>
 ```
 
 This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to achieve recorded hypertension with a blood pressure reading record than those without (92.8% vs 87%, September 2024).
+
+#### Age ∩ Gender
+
+```{r}
+#| fig-height: 9
+#| fig-cap: Timeseries of blood pressure monitoring for people with hypertension in England by the intersection of age group and gender
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP004HYP',
+    category_attribute != 'Persons', # get the overall value
+    metric_category_type_name %in% c('Age group')
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    # NB, dropping unused factor levels to ensure the colouring works
+    series = category_attribute |> forcats::fct_drop(),
+    facet = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series} <b>({metric_category_name})</b>\n",
+      "{round(value, digits = 1)}% BP monitoring\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+
+# plot
+plot_intersection_timeseries(
+  .df = df,
+  .y_axis_title = "Crude rate\n(percent)"
+)
+```
+
+Women aged 18-39 and 40-59 are slightly more likely than men in these age groups to have routine blood pressure monitoring for their hypertension.
+
+In the 60-70 age group both genders are equally likely to have their blood pressure monitored.
+
+In the 80+ years age group we observe men are slightly more likely than women to have their blood pressure monitored.
 :::
 
 ### Distributions over time

@@ -30,7 +30,7 @@ configure_plotly <- function(p) {
       )
     ) |>
     plotly::partial_bundle()
-
+  
   return(p)
 }
 
@@ -52,12 +52,12 @@ su_pal <- StrategyUnitTheme::su_theme_pal("main")
 #'
 #' @returns {plotly} subplot object
 plot_timeseries_agestandardised <- function(df, plot_title) {
-
+  
   # prepare the annotations
   df_annotate <-
     df |>
     dplyr::slice_max(time_period_month)
-
+  
   df_annotate_crude <-
     df_annotate |>
     dplyr::filter(
@@ -67,7 +67,7 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
         negate = TRUE
       )
     )
-
+  
   df_annotate_agestd <-
     df_annotate |>
     dplyr::filter(
@@ -77,10 +77,10 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
         negate = FALSE
       )
     )
-
+  
   # prepare the colours
   plot_colours <- su_pal(n = df$series |> levels() |> length())
-
+  
   # crude rate
   p1 <-
     df |>
@@ -96,7 +96,7 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
       plot_colours = plot_colours,
       y_axis_title = "Crude hypertension prevalence\n(percent)"
     )
-
+  
   # age-standardised rate
   p2 <-
     df |>
@@ -112,7 +112,7 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
       plot_colours = plot_colours,
       y_axis_title = "Age-standardised hypertension prevalence\n(percent)"
     )
-
+  
   # combine the two
   plot <-
     plotly::subplot(
@@ -124,9 +124,9 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
       showlegend = FALSE
     ) |>
     configure_plotly()
-
+  
   return(plot)
-
+  
 }
 
 #' Plot time-series for crude data
@@ -140,15 +140,15 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
 #'
 #' @returns {plotly} object
 plot_timeseries <- function(df, plot_title, y_axis_title) {
-
+  
   # prepare the annotations
   df_annotate <-
     df |>
     dplyr::slice_max(time_period_month)
-
+  
   # prepare the colours
   plot_colours <- su_pal(n = df$series |> levels() |> length())
-
+  
   # plot
   plot <-
     df |>
@@ -163,7 +163,7 @@ plot_timeseries <- function(df, plot_title, y_axis_title) {
       showlegend = FALSE
     ) |>
     configure_plotly()
-
+  
   return(plot)
 }
 
@@ -184,8 +184,8 @@ plot_timeseries_single <- function(
     df_annotate,
     plot_colours,
     y_axis_title = "(percent)"
-  ) {
-
+) {
+  
   plot <-
     df |>
     plotly::plot_ly(
@@ -223,14 +223,24 @@ plot_timeseries_single <- function(
       ),
       showlegend = FALSE
     )
-
+  
   return(plot)
 }
 
+#' Plot the SII for focal schemes
+#' 
+#' This function produces a faceted {plotly} time-series chart for the specified 
+#' focal ICBs as a line and marker scatter plot with confidence intervals 
+#' overlaid on a background of grey traces showing all other focal ICBs.
+#'
+#' @param .df_sii Tibble - time-series SII data to plot
+#' @param .df_icb_focal Tibble - a df identifying the focal ICBs
+#'
+#' @returns {plotly}
 plot_focal_scheme_sii_timeseries <- function(
     .df_sii,
     .df_icb_focal
-  ) {
+) {
   # iterate over the focal icbs and generate a plotly::subplot
   
   # setup ---
@@ -307,13 +317,26 @@ plot_focal_scheme_sii_timeseries <- function(
   
 }
 
+#' Plot the SII for a single focal scheme
+#' 
+#' This function produces a single {plotly} time-series chart for the specified 
+#' focal ICB as a line and marker scatter plot with confidence intervals 
+#' overlaid on a background of grey traces showing all other focal ICBs.
+#'
+#' @param .icb String - the area code of the ICB to produce this plot for
+#' @param .plot_base {plotly} - a plot showing all focal ICB time-series as grey traces
+#' @param .df_focal Tibble - time-series metric data for the focal ICBs
+#' @param .col_marker Colour - the colour definition for the markers
+#' @param .col_line Colour - the colour definition for the lines
+#'
+#' @returns {plotly}
 plot_focal_scheme_sii_timeseries_single <- function(
     .icb,
     .plot_base,
     .df_focal,
     .col_marker,
     .col_line
-  ) {
+) {
   # create a single chart to be included in the subplot
   
   # setup ---
@@ -335,6 +358,10 @@ plot_focal_scheme_sii_timeseries_single <- function(
     ) |> 
     # add the name of the ICB
     plotly::add_annotations(
+      data = df_icb |> 
+        dplyr::ungroup() |> 
+        dplyr::select(area_name) |>
+        dplyr::distinct(),
       text = ~ area_name,
       x = 0.5,
       y = 1,
@@ -400,6 +427,150 @@ plot_focal_scheme_sii_timeseries_single <- function(
 }
 
 
+#' Plot a faceted chart of demographic intersections
+#' 
+#' This function produces a {plotly} subplot showing time-series charts 
+#' of intersections between two demographic characteristics.
+#' 
+#' These are limited to Age and Gender as these are the only data available
+#' from CVDPREVENT which are split by both characteristics.
+#'
+#' @param .df Tibble of time-series metric data for plotting
+#' @param .y_axis_title String - the label to use on the y-axis
+#'
+#' @returns {plotly} plot
+plot_intersection_timeseries <- function(
+    .df,
+    .y_axis_title = "(percent)"
+) {
+  
+  # iterate over .df$facet and generate charts
+  plot_list <-
+    purrr::map(
+      .x = .df$facet |> unique(),
+      .f = \(.x) plot_intersection_timeseries_single(
+        .df = .df,
+        .facet = .x,
+        .y_axis_title = .y_axis_title
+      )
+    )
+  
+  # create the faceted plot
+  plot <- 
+    plotly::subplot(
+      plot_list,
+      nrows = length(plot_list),
+      # add spacing between plots to allow for facet titles
+      # needs scaling in proportion to number of facets
+      margin = c(
+        0, 0,
+        0.1 * (1 / length(plot_list)),
+        0.1 * (1 / length(plot_list))
+      ), # l, r, t, b
+      shareY = TRUE, 
+      shareX = FALSE
+    ) |> 
+    configure_plotly()
+  
+  # return the facet chart
+  return(plot)
+  
+}
+
+#' Plot a single chart of demographic intersections
+#' 
+#' This function produces a single {plotly} plot showing a time-series chart 
+#' of the intersections between two demographic characteristics.
+#' 
+#' These are limited to Age and Gender as these are the only data available
+#' from CVDPREVENT which are split by both characteristics.
+#' 
+#'
+#' @param .df Tibble of time-series metric data for plotting
+#' @param .facet String - the value of a single age-group on which to plot
+#' @param .y_axis_title String - the label to use on the y-axis
+#'
+#' @returns {plotly} plot
+plot_intersection_timeseries_single <- function(
+    .df,
+    .facet,
+    .y_axis_title
+) {
+  
+  # limit the data to the specified facet
+  df <-
+    .df |> 
+    dplyr::filter(facet == .facet)
+  
+  
+  # plot colours
+  plot_colours <- su_pal(n = df$series |> levels() |> length())
+  
+  # annotations
+  df_annotate <-
+    df |>
+    dplyr::slice_max(time_period_month)
+  
+  # plot
+  plot <-
+    df |>
+    plotly::plot_ly(
+      x = ~ time_period_month,
+      y = ~ value,
+      hovertemplate = ~ text,
+      colors = plot_colours,
+      color = ~ series
+    ) |>
+    plotly::add_annotations(
+      data = df |>
+        dplyr::ungroup() |> 
+        dplyr::select(metric_category_name) |>
+        dplyr::distinct(),
+      text = ~ metric_category_name,
+      x = 0.5,
+      y = 1,
+      yref = "paper",
+      xref = "paper",
+      xanchor = "center",
+      yanchor = "top",
+      showarrow = FALSE,
+      font = list(size = 15)
+    ) |>
+    plotly::add_trace(
+      data = df,
+      name = ~ series,
+      type = "scatter",
+      mode = "lines",
+      line = list(width = 5),
+      opacity = 0.3
+    ) |>
+    plotly::add_trace(
+      name = ~ series,
+      type = "scatter",
+      mode = "markers"
+    ) |>
+    plotly::add_annotations(
+      data = df_annotate,
+      text = ~ series,
+      showarrow = FALSE,
+      xanchor = "left",
+      borderpad = 10
+    ) |>
+    plotly::layout(
+      font = plotly_font_family,
+      xaxis = list(title = ""),
+      yaxis = list(
+        title = .y_axis_title#,
+        #rangemode = "tozero"
+      ),
+      showlegend = FALSE
+    )
+  
+  return(plot)
+  
+}
+
+
 # leaflet ----------------------------------------------------------------------
 
 # set highlight options
@@ -419,10 +590,10 @@ leaflet_highlight <- leaflet::highlightOptions(
 #'
 #' @returns `leaflet` map
 add_leaflet_polygon <- function(map, report_period) {
-
+  
   # add this layer to the poly_layers
   poly_layers <<- c(report_period, poly_layers) |> unique()
-
+  
   # get the report period data
   df <-
     df_sii |>
@@ -438,11 +609,11 @@ add_leaflet_polygon <- function(map, report_period) {
         area_code == ICB23CD
       )
     )
-
+  
   # prepare the labels
   labs <- df$hover_label |>
     lapply(htmltools::HTML)
-
+  
   # add the data as polygons to the map
   map <-
     map |>
@@ -462,7 +633,7 @@ add_leaflet_polygon <- function(map, report_period) {
         )
       )
     )
-
+  
   return(map)
-
+  
 }
