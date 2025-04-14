@@ -2646,6 +2646,14 @@ df |>
   )
 ```
 
+The main point to note from this chart is that GP hypertension with a record of treated to threshold reached the highest percentage up to 81.6% of people 80 and over were recorded over this period.
+
+There is a dramatic fall in the rate between March 2020 and March 2021, where the proportion of people treated to threshold fell from 81.6% to 57.5%.
+
+The trend since March 2021, however, is upwards, peaking at 80.3% in March 2024 before falling slightly to 78.7% in June 2024 and 78.6% in September 2024.
+
+Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 1.35 million (M) people in March 2020 to 1.87 M by September 2024.
+
 #### Gender
 
 ```{r}
@@ -2682,6 +2690,10 @@ df |>
     y_axis_title = "People with hypertension treated to threshold\n(percent)"
   )
 ```
+
+The trends for each gender are broadly similar to the overall trends noted above. Men tend to have a higher crude rate of treated to threshold than men for all reporting periods.
+
+The denominators for both groups are broadly similar in each reporting period, however, there tend to be more men with hypertension than women.
 
 #### Age
 
@@ -2720,6 +2732,9 @@ df |>
   )
 ```
 
+From March 2020 to September 2024 (81.6% to less than equal 80%), 80+ age group with hypertension seems to  have a decreasing to be treated to threshold
+
+
 #### Ethnicity
 
 ```{r}
@@ -2756,6 +2771,10 @@ df |>
     y_axis_title = "People with hypertension treated to threshold\n(percent)"
   )
 ```
+
+The relationship between ethnicity and treatment to threshold is not clear from this visualisation.
+
+There are disparities with some groups recording consistently lower rates, such as people with a `Black` broad ethnic background as well as those whose ethnicity is `Missing` from their GP record or who refused to provide this information for their GP record (`Not stated`), in contrast to people of `Asian` or `White` broad ethnic backgrounds who generally appear to achieve higher rates of treatment to threshold.
 
 #### Deprivation
 
@@ -2794,6 +2813,8 @@ df |>
   )
 ```
 
+There is a clear relationship between deprivation quintile and treatment to threshold. People living in areas of higher deprivation and those living in areas of least deprivation are likely to be treatment to threshold at 78%.
+
 #### SMI
 
 ```{r}
@@ -2831,6 +2852,11 @@ df |>
   )
 ```
 
+There are only three reporting periods available for this relatively new metric, introduced in March 2024.
+
+It appears that people with a Serious Mental Illness are more likely to be treated to threshold than people without, (80.1% vs 78.6%, September 2024). However, the denominators show that there are far fewer people with SMI (17.85 k) than those without (1.85 M).
+
+
 #### LD
 
 ```{r}
@@ -2867,6 +2893,8 @@ df |>
     y_axis_title = "People with hypertension treated to threshold\n(percent)"
   )
 ```
+
+This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to be treated to threshold than those without (80.5% vs 78.6%, September 2024).
 
 #### Age ∩ Gender
 
@@ -3317,8 +3345,6 @@ By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue,
 
 In June 2024 and September 2024 the darker blue is replaced by more yellow/orange indicating that inequity is getting worse than the peak of March 2023.
 
-
-
 #### Focal ICBs
 
 ```{r}
@@ -3335,7 +3361,6 @@ plot_list <-
 # display the plot
 plot_list
 ```
-
 
 ## CVDP004HYP
 
@@ -3528,7 +3553,7 @@ df |>
   )
 ```
 
-The relationship between ethnicity and treatment to threshold is not clear from this visualisation.
+The relationship between ethnicity and blood pressure reading is not clear from this visualisation.
 
 There are disparities with some groups recording consistently lower rates, such as people with a `Black` broad ethnic background as well as those whose ethnicity is `Missing` from their GP record or who refused to provide this information for their GP record (`Not stated`), in contrast to people of `Asian` or `White` broad ethnic backgrounds who generally appear to achieve higher rates of blood pressure reading record.
 
@@ -4105,7 +4130,6 @@ By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue,
 
 In June 2024 and September 2024 the darker blue is replaced by more lighter shades indicating that inequity still exists but to a lesser extent than the peak of March 2023.
 
-
 #### Focal ICBs
 
 ```{r}
@@ -4307,6 +4331,52 @@ df |>
 ```
 
 The relationship between deprivation and high risk – one high blood pressure with no recorded hypertension is more complex, for example the most deprived group does not consistently have the higher rate with Quintile 4 often being the highest. Similarly for Quntiles 5 and 2 for the lowest rates for this outcome.
+
+
+#### Age ∩ Gender
+
+```{r}
+#| fig-height: 9
+#| fig-cap: Timeseries of high risk – one high blood pressure for people with no hypertension in England by the intersection of age group and gender
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP005HYP',
+    category_attribute != 'Persons', # get the overall value
+    metric_category_type_name %in% c('Age group')
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    # NB, dropping unused factor levels to ensure the colouring works
+    series = category_attribute |> forcats::fct_drop(),
+    facet = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series} <b>({metric_category_name})</b>\n",
+      "{round(value, digits = 1)}% high risk-high BP\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+
+# plot
+plot_intersection_timeseries(
+  .df = df,
+  .y_axis_title = "Crude rate\n(percent)"
+)
+```
+
+Men aged 18-39 and 40-59 are slightly more likely than Women in these age groups to have routine high risk - high blood pressure.
+
+In the 60-70 age group, Men are equally likely to have high risk - high blood pressure.
+
+In the 80+ years age group we observe women are slightly more likely than men to have their high risk - high blood pressure.
 :::
 
 ### Distributions over time
@@ -5043,6 +5113,51 @@ df |>
 ```
 
 This metric was introduced in June 2023 illustrates that people with potential antihypertensive overtreatment who also have a Learning Disability are more likely to achieve potential antihypertensive overtreatment than those without (1.1% vs 0.5%, September 2024).
+
+#### Age ∩ Gender
+
+```{r}
+#| fig-height: 9
+#| fig-cap: Timeseries of potential antihypertensive overtreatment for people with hypertension in England by the intersection of age group and gender
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP006HYP',
+    category_attribute != 'Persons', # get the overall value
+    metric_category_type_name %in% c('Age group')
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    # NB, dropping unused factor levels to ensure the colouring works
+    series = category_attribute |> forcats::fct_drop(),
+    facet = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series} <b>({metric_category_name})</b>\n",
+      "{round(value, digits = 1)}% potential antihypertensive overtreatment\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+
+# plot
+plot_intersection_timeseries(
+  .df = df,
+  .y_axis_title = "Crude rate\n(percent)"
+)
+```
+
+Women aged 18-39 and 40-59 are slightly more likely than men in these age groups to have potential antihypertensive overtreatment for their hypertension.
+
+In the 60-70 age group, men is likely to have their potential antihypertensive overtreatment but women follow the same pattern.
+
+In the 80+ years age group we observe men are slightly more likely than women to have their potential antihypertensive overtreatment.
 :::
 
 ### Distributions over time
@@ -5570,7 +5685,7 @@ df |>
   )
 ```
 
-The trends for each gender are broadly similar to the overall trends noted above. Women tend to have a higher crude rate of treated to appropriate threshold than Woman for all reporting periods.
+The trends for each gender are broadly similar to the overall trends noted above. Woman tend to have a higher crude rate of treated to appropriate threshold than men for all reporting periods.
 
 The denominators for both groups are broadly similar in each reporting period, however, there tend to be more women with hypertension than men. This does not fit with the national literature (see Section 2.1) that below the age of 65 years men tend to have higher blood pressure than women, with the inference than men are more likely to be diagnosed with hypertension.
 
@@ -5621,7 +5736,7 @@ Despite this narrower gap in treated to appropriate threshold between the age gr
 
 -   `18-39` age group had only 0.21 M people in the denominator, around 4% of the `60-79` group.
 
-Use of the crude treated to appropriate threshold rates appears to present fewer issues than it did when looking at hypertension prevalence. The age groups are much closer in their treated to appropriate thresholdwhich means any differences in age profile between geographical areas are less likely to result in large effects on the overall treated to appropriate threshold rate for the area.
+Use of the crude treated to appropriate threshold rates appears to present fewer issues than it did when looking at hypertension prevalence. The age groups are much closer in their treated to appropriate threshold which means any differences in age profile between geographical areas are less likely to result in large effects on the overall treated to appropriate threshold rate for the area.
 
 #### Ethnicity
 
@@ -5645,7 +5760,7 @@ df <-
     text = glue::glue(
       "<b>{time_period_name_f}</b>\n",
       "{series}\n",
-      "{round(value, digits = 1)}% high risk – one high BP\n",
+      "{round(value, digits = 1)}% treated to appropriate threshold\n",
       "Numerator: {prettyunits::pretty_num(numerator)}\n",
       "Denominator: {prettyunits::pretty_num(denominator)}"
     )
@@ -5784,6 +5899,51 @@ df |>
 ```
 
 This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to achieve treated to appropriate threshold than those without (70.7% vs 66.8%, September 2024).
+
+#### Age ∩ Gender
+
+```{r}
+#| fig-height: 9
+#| fig-cap: Timeseries of treated to appropriate threshold for people with hypertension in England by the intersection of age group and gender
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP007HYP',
+    category_attribute != 'Persons', # get the overall value
+    metric_category_type_name %in% c('Age group')
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    # NB, dropping unused factor levels to ensure the colouring works
+    series = category_attribute |> forcats::fct_drop(),
+    facet = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series} <b>({metric_category_name})</b>\n",
+      "{round(value, digits = 1)}% treated to appropriate threshold\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+
+# plot
+plot_intersection_timeseries(
+  .df = df,
+  .y_axis_title = "Crude rate\n(percent)"
+)
+```
+
+Women aged 18-39 and 40-59 are slightly more likely than men in these age groups to have treated to appropriate threshold for their hypertension.
+
+In the 60-70 age group both genders are equally likely to be treated to appropriate threshold.
+
+In the 80+ years age group we observe men are slightly more likely than women to be treated to appropriate threshold.
 :::
 
 ### Distributions over time
@@ -6192,6 +6352,782 @@ The majority of ICBs appear to be coloured various shades of blue, indicating th
 By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue, indicating greater inequity of access for people living in areas of highest deprivation.
 
 In June 2024 and September 2024 the darker blue is replaced by more lighter shades indicating that inequity still exists but to a lesser extent than the peak of March 2023.
+
+#### Focal ICBs
+
+```{r}
+#| fig-height: 60
+#| fig-cap: Trend in inequality (SII) of crude rates of treatment to threshold for the focal ICBs
+ 
+# produce a facet/subplot timeseries plots for each ICB
+plot_list <-
+  plot_focal_scheme_sii_timeseries(
+    .df_sii = df_sii,
+    .df_icb_focal = df_icb_focal
+  )
+
+# display the plot
+plot_list
+```
+
+
+## CVDP009HYP
+
+This metric looks at the percentage of patients aged 18 and over, with GP recorded hypertension (excluding patients with chronic kidney disease (CKD) (G3a to G5)), with a record of a urine albumin:creatinine ratio (ACR) or protein:creatinine ratio (PCR) test in the preceding 12 months. atment threshold.
+
+
+Breakdowns of England-wide hypertension treated to threshold as unadjusted rates are available by:
+
+-   Gender,
+
+-   Age group,
+
+-   Deprivation quintile,
+
+-   Broad ethnic group,
+
+-   People with or without a Learning Disability (LD), and
+
+-   People with or without a Serious Mental Illness (SMI).
+
+::: panel-tabset
+#### Overall
+
+```{r}
+#| fig-height: 8
+#| fig-cap: Timeseries of hypertension monitoring with ACR in England
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    metric_category_name == 'Persons', # get the overall value
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    series = "Monitoring with ACR" |> forcats::fct(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{round(value, digits = 1)}% monitoring with ACR\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+# plot the result
+df |> 
+  plot_timeseries(
+    plot_title = "England hypertension monitoring with ACR (CVDP009HYP)",
+    y_axis_title = "People with hypertension monitoring ACR\n(percent)"
+  )
+```
+
+The main point to note from this chart is that hypertension monitoring with ACR reached the highest percentage up to 29.8% of people aged 18+ over this period.
+
+The trend since March 2022 is upwards, Starting at 28.6% in March 2024 and peaking at 70.9% in September 2024
+
+Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 6.85 million (M) people in March 2024 to 7.4 M by September 2024.
+
+#### Gender
+
+```{r}
+#| fig-height: 8
+#| fig-cap: Timeseries of the rate of people hypertension monitoring with ACR in England by gender
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    metric_category_type_name == 'Sex',
+    metric_category_name != 'Persons'
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    series = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series}\n",
+      "{round(value, digits = 1)}% monitoring with ACR\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+# plot the result
+df |> 
+  plot_timeseries(
+    plot_title = "England hypertension monitoring with ACR (CVDP009HYP) - gender",
+    y_axis_title = "People hypertension monitoring with ACR\n(percent)"
+  )
+```
+
+The trends for each gender are broadly similar to the overall trends noted above. Men tend to have a higher crude rate of treated to appropriate threshold than Woman for all reporting periods.
+
+The denominators for both groups are broadly similar in each reporting period.This does not fit with the national literature (see Section 2.1) that below the age of 65 years men tend to have higher blood pressure than women, with the inference than men are more likely to be diagnosed with hypertension.
+
+#### Age
+
+```{r}
+#| fig-height: 8
+#| fig-cap: Timeseries of the rate of people hypertension monitoring with ACR in England by age group
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    metric_category_type_name == 'Age group',
+    category_attribute == 'Persons' # don't have separate genders
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    series = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series}\n",
+      "{round(value, digits = 1)}% monitoring with ACR\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+# plot the result
+df |> 
+  plot_timeseries(
+    plot_title = "England hypertension monitoring with ACR (CVDP009HYP) - age group",
+    y_axis_title = "hypertension monitoring with ACR\n(percent)"
+  )
+```
+
+There is a clear pattern demonstrated here that as age-group increases so too does the likelihood for hypertension monitoring ACR within limits. However, this relationship is not so nearly as strong as that observed between hypertension prevalence and age group (see @sec-national-trends).
+
+Despite this narrower gap in treated to appropriate threshold between the age groups, there are still notable differences in the denominators. In September 2024 the:
+
+-   `60-79` age group had 4 M people in the denominator,
+
+-   `40-59` age group had 2.1 M people in the denominator, around half of the `60-79` group,
+
+-   `18-39` age group had only 0.21 M people in the denominator, around 5.25% of the `60-79` group.
+
+Use of the crude hypertension monitoring with ACR rates appears to present fewer issues than it did when looking at hypertension prevalence. The age groups are much closer in their hypertension monitoring with ACR which means any differences in age profile between geographical areas are less likely to result in large effects on the overall hypertension monitoring with ACR rate for the area.
+
+#### Ethnicity
+
+```{r}
+#| fig-height: 8
+#| fig-cap: Timeseries of the rate of people hypertension monitoring with ACR in England by ethnicity
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    metric_category_type_name == 'Ethnicity',
+    category_attribute == 'Persons' # don't have separate genders
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    series = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series}\n",
+      "{round(value, digits = 1)}% hypertension monitoring with ACR\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+# plot the result
+df |> 
+  plot_timeseries(
+    plot_title = "England hypertension monitoring with ACR (CVDP009HYP) - broad ethnic group",
+    y_axis_title = "People hypertension monitoring with ACR\n(percent)"
+  )
+```
+
+The relationship between ethnicity and treated to appropriate threshold is not clear from this visualisation.
+
+There are disparities with some groups recording consistently lower rates, such as people with a `Missing` broad ethnic background as well as those whose ethnicity is `Mixed` from their GP record or who refused to provide this information for their GP record (`Not stated`), in contrast to people of `Asian` or `Other` broad ethnic backgrounds who generally appear to achieve higher rates of treated to appropriate threshold.
+
+#### Deprivation
+
+```{r}
+#| fig-height: 8
+#| fig-cap: Timeseries of the rate of people hypertension monitoring with ACR in England by deprivation quintile
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    metric_category_type_name == 'Deprivation quintile',
+    category_attribute == 'Persons' # don't have separate genders
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    series = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series}\n",
+      "{round(value, digits = 1)}% monitoring with ACR\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+# plot the result
+df |> 
+  plot_timeseries(
+    plot_title = "England hypertension monitoring with ACR (CVDP008HYP) - deprivation",
+    y_axis_title = "People hypertension monitoring with ACR \n(percent)"
+  )
+```
+
+There is a clear relationship between deprivation quintile and hypertension monitoring with ACR. People living in areas of least deprived area consistently achieve lower rates of hypertension monitoring with ACR compared with those living in areas of most deprived area.
+
+Moreover, there appears to be a step-wise correlation between deprivation quintile and hypertension monitoring with ACR, with people living in areas of higher deprivation less likely to get hypertension monitoring with ACR.
+
+#### SMI
+
+```{r}
+#| fig-height: 8
+#| fig-cap: Timeseries of the rate of people hypertension monitoring with ACR in England by mental health status
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    metric_category_type_name == 'Mental Health',
+    category_attribute == 'Persons' # don't have separate genders
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    series = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series}\n",
+      "{round(value, digits = 1)}% monitoring with ACR\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+# plot the result
+df |> 
+  plot_timeseries(
+    plot_title = "England hypertension monitoring with ACR (CVDP009HYP) - SMI",
+    y_axis_title = "People hypertension monitoring with ACR\n(percent)"
+  )
+```
+
+There are only three reporting periods available for this relatively new metric, introduced in March 2024.
+
+It appears that people without a Serious Mental Illness are more likely to be monitored with ACR with, (29.8% vs 28.4%, September 2024). However, the denominators show that there are far fewer people with SMI (0.1 M) than those without (7.28 M).
+
+#### LD
+
+```{r}
+#| fig-height: 8
+#| fig-cap: Timeseries of the rate of people hypertension monitoring with ACR in England by mental learning disability status
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    metric_category_type_name == 'Learning Disability',
+    category_attribute == 'Persons' # don't have separate genders
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    series = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series}\n",
+      "{round(value, digits = 1)}% monitoring with ACR\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+# plot the result
+df |> 
+  plot_timeseries(
+    plot_title = "England hypertension monitoring with ACR (CVDP009HYP) - LD",
+    y_axis_title = "People hypertension monitoring with ACR\n(percent)"
+  )
+```
+
+This metric was introduced in June 2023 illustrates that people without hypertension who also have a Learning Disability are more likely to get hypertension monitoring with ACR than those with (29.8% vs 26.8%, September 2024).
+
+#### Age ∩ Gender
+
+```{r}
+#| fig-height: 9
+#| fig-cap: Timeseries of monitoring with ACR for people with hypertension in England by the intersection of age group and gender
+
+# prepare the data for plotting
+df <-
+  df_metrics_eng |> 
+  # limit to metric and overall measure
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    category_attribute != 'Persons', # get the overall value
+    metric_category_type_name %in% c('Age group')
+  ) |> 
+  dplyr::mutate(
+    # how should the series be defined?
+    # NB, dropping unused factor levels to ensure the colouring works
+    series = category_attribute |> forcats::fct_drop(),
+    facet = metric_category_name |> forcats::fct_drop(),
+    # create hovertext
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "{series} <b>({metric_category_name})</b>\n",
+      "{round(value, digits = 1)}% monitoring with ACR\n",
+      "Numerator: {prettyunits::pretty_num(numerator)}\n",
+      "Denominator: {prettyunits::pretty_num(denominator)}"
+    )
+  ) |> 
+  dplyr::group_by(series)
+
+
+# plot
+plot_intersection_timeseries(
+  .df = df,
+  .y_axis_title = "Crude rate\n(percent)"
+)
+```
+
+Men for all age groups are more likely than women to have routine ACR for their hypertension.
+
+:::
+
+### Distributions over time
+
+Hypertension monitoring with ACR rates are distributed unevenly across ICBs, with some having lower rates and others higher rates in each reporting period.
+
+*Box-plots* provide one way to summarise distributions that allow comparisons across time, for example.
+
+```{r}
+#| fig-height: 9
+#| fig-cap: Distributions of rates of people hypertension monitoring with ACR per ICBs over successive reporting periods
+
+df_metrics_icb |> 
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    metric_category_name == 'Persons', # total counts of people
+  ) |> 
+  plotly::plot_ly(
+    x = ~ value,
+    y = ~ forcats::fct_rev(time_period_name_f),
+    type = "box",
+    fillcolor = adjustcolor("#abc0e0", alpha.f = 0.5),
+    line = list(color = "#abc0e0"),
+    marker = list(color = "#abc0e0")
+  ) |> 
+  plotly::layout(
+    title = "ICB distribution -  hypertension monitoring with ACR (CVDP009HYP)",
+    font = plotly_font_family,
+    xaxis = list(
+      title = "People hypertension monitoring with ACR (percent)", 
+      rangemode = "tozero"
+    ),
+    yaxis = list(title = "")
+  ) |> 
+  configure_plotly()
+```
+
+### Deprivation breakdowns
+
+```{r}
+#| fig-height: 7
+
+# prepare the metric data
+df_dep_icb |> 
+  dplyr::filter(
+    indicator_code == 'CVDP009HYP',
+    metric_category_type_name == 'Deprivation quintile'
+  ) |> 
+  dplyr::mutate(
+    time_period_name_f = time_period_name_f |> forcats::fct_drop()
+  ) |> 
+  plotly::plot_ly(
+    x = ~ value,
+    y = ~ deprivation,
+    frame = ~ time_period_name_f,
+    type = "box",
+    fillcolor = adjustcolor("#abc0e0", alpha.f = 0.5),
+    line = list(color = "#abc0e0"),
+    marker = list(color = "#abc0e0")
+  ) |> 
+  plotly::layout(
+    title = "ICB distribution - hypertension monitoring with ACR (CVDP009HYP)",
+    font = plotly_font_family,
+    xaxis = list(title = "hypertension monitoring with ACR (percent)")
+  ) |> 
+  plotly::animation_slider(
+    currentvalue = list(prefix = "", font = list(color = "black"))  
+  ) |> 
+  configure_plotly()
+```
+
+::: callout-note
+#### Date limits
+
+ICBs were established in the summer of 2022, replacing previous system of CCGs. As a result ICB-level data is only available from June 2022 onwards from the CVDPREVENT audit data, though it *may* be possible to construct ICB-level equivalent data based on CCG footprints to get data older than June 2022.
+
+The decision whether to proceed with this rests on whether the additional back-dated data will be helpful in conducting the impact evaluation using techniques such as interrupted time-series analysis.
+:::
+
+### Slope Index of Inequality
+
+The Slope Index of Inequality (SII) is a statistical measure used to assess health disparities and socio-economic inequalities within a population.
+
+It quantifies the relationship between a health outcome and a socio-economic variable, such as deprivation, by examining how the health outcome varies across different socio-economic groups.
+
+The SII is particularly valuable because it provides a comprehensive view of inequality by considering the entire distribution of the socio-economic variable, rather than just comparing specific groups.
+
+To appreciate how the SII applies to this measure here is an example slope as calculated from the latest reporting time period:
+
+```{r}
+#| fig-height: 6
+#| fig-cap: Inequality of crude rate of hypertension monitoring with ACR by deprivation quintile - example month
+
+# get the latest reporting period
+df <-
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::filter(
+    indicator_code == "CVDP009HYP",
+    metric_category_type_name == "Deprivation quintile"
+  ) |> 
+  dplyr::mutate(
+    subgroup_order = as.numeric(deprivation),
+    deprivation_text = glue::glue(
+      "Deprivation quintile {as.numeric(deprivation)}"
+    ),
+    text = glue::glue(
+      "<b>{deprivation_text}</b>\n",
+      "{time_period_name}\n",
+      "Prevalence: {round(value, digits = 1)}% ",
+      "(95% CI: {round(lower_confidence_limit, digits = 2)}% to {round(upper_confidence_limit, digits = 2)}%)"
+    )
+  ) |> 
+  dplyr::arrange(subgroup_order)
+
+# calculate the sii
+df_sii <-
+  df |> 
+  dplyr::summarise(
+    sii = healthequal::sii(
+      est = value,
+      pop = denominator,
+      subgroup_order = subgroup_order
+    )
+  ) |> 
+  tidyr::unnest(sii)
+
+# fit a lm for the linear regression
+fit <- lm(value ~ as.numeric(deprivation), data = df)
+
+# plot values by deprivation and simulate sii
+df |> 
+  plotly::plot_ly(
+    x = ~ deprivation
+  ) |> 
+  plotly::add_segments(
+    name = "95% Confidence Interval",
+    x = ~ deprivation, xend = ~ deprivation,
+    y = ~ lower_confidence_limit, yend = ~ upper_confidence_limit,
+    line = list(color = adjustcolor("#abc0e0", alpha.f = 0.3), width = 5),
+    hovertemplate = ""
+  ) |> 
+  plotly::add_trace(
+    name = "Rate",
+    y = ~ value,
+    type = "scatter",
+    mode = "markers",
+    marker = list(size = 10, color = "#abc0e0"),
+    hovertemplate = ~ text
+  ) |> 
+  plotly::add_trace(
+    name = "SII",
+    y = fitted(fit),
+    type = "scatter",
+    mode = "lines",
+    line = list(color = "#abc0e0", dash = "dot"),
+    hovertemplate = glue::glue("SII: {fitted(fit)}")
+  ) |> 
+  plotly::add_annotations(
+    x = ~ 3,
+    y = ~ 1.5,
+    text = glue::glue("<b>Slope Index of Inequality</b>\n{round(df_sii$estimate, digits = 1)}%"),
+    showarrow = FALSE
+  ) |> 
+  plotly::layout(
+    title = "Crude hypertension monitoring with ACR - September 2024",
+    font = plotly_font_family,
+    legend = list(orientation = "h"),
+    xaxis = list(title = ""),
+    yaxis = list(
+      title = "People hypertension monitoring with ACR\n(percent)",
+      rangemode = "tozero"
+    )
+  ) |> 
+  configure_plotly()
+```
+
+```{r}
+#| fig-height: 6
+#| fig-cap: Trend in inequality (SII) of crude rates of hypertension monitoring with ACR
+
+# get the latest reporting period
+df <-
+  df_dep_eng |> 
+  dplyr::filter(
+    indicator_code == "CVDP009HYP",
+    metric_category_type_name == "Deprivation quintile"
+  ) |> 
+  dplyr::mutate(subgroup_order = as.numeric(deprivation)) |> 
+  dplyr::summarise(
+    sii = healthequal::sii(
+      est = value,
+      subgroup_order = subgroup_order,
+      weight = denominator
+    ),
+    .by = c(time_period_month, time_period_name_f)
+  ) |> 
+  tidyr::unnest(sii) |> 
+  dplyr::mutate(
+    text = glue::glue(
+      "<b>{time_period_name_f}</b>\n",
+      "Slope Index of Inequality: {round(estimate, digits = 1)}\n",
+      "95% Confidence Interval: {round(lowerci, digits = 1)} to {round(upperci, digits = 1)}"
+    )
+  )
+    
+# plot the sii over time
+df |> 
+  plotly::plot_ly(
+    x = ~ time_period_month
+  ) |> 
+  plotly::add_trace(
+    name = "Upper CI",
+    y = ~ upperci,
+    type = "scatter",
+    mode = "lines",
+    line = list(color = "transparent"),
+    hoverinfo = "skip"
+  ) |> 
+  plotly::add_trace(
+    name = "Lower CI",
+    y = ~ lowerci,
+    type = "scatter",
+    mode = "lines",
+    fill = "tonexty",
+    fillcolor = adjustcolor("#abc0e0", alpha.f = 0.2),
+    line = list(color = "transparent"),
+    hoverinfo = "skip"
+  ) |> 
+  plotly::add_trace(
+    name = "SII",
+    y = ~ estimate,
+    type = "scatter",
+    mode = "lines+markers",
+    hovertemplate = ~ text,
+    line = list(color = "#abc0e0"),
+    marker = list(color = "#abc0e0")
+  ) |> 
+  plotly::layout(
+    title = "Slope Index of Inequality (SII) timeseries",
+    font = plotly_font_family,
+    showlegend = FALSE,
+    yaxis = list(
+      title = "Slope Index of Inequality (SII)\n(Closer to zero is better)", 
+      showgrid = FALSE, showline = FALSE, 
+      rangemode = "tozero"
+    ),
+    xaxis = list(title = "", showgrid = FALSE, showline = FALSE)
+  ) |> 
+  configure_plotly()
+```
+
+There was a general trend of increasing inequality between March 2024 and September 2024, from -5.1% to -4.4%.
+
+The confidence intervals are much tighter in this plot than those seen in the age-standardised hypertension prevalence (see @sec-age-standardised-prevalence), indicating there is much less uncertainty about these SII estimates.
+
+### Geography
+
+```{r}
+# expensive operation - process only if required
+if (params$flag_calc_expensive_operations) {
+  # prepare the data
+  df_dep_icb_sii <-
+    df_dep_icb |> 
+    dplyr::filter(
+      indicator_code == "CVDP009HYP",
+      metric_category_type_name == "Deprivation quintile"
+    ) |> 
+    # continue with wrangling
+    dplyr::mutate(subgroup_order = as.numeric(deprivation)) |> 
+    dplyr::summarise(
+      sii = healthequal::sii(
+        est = value,
+        subgroup_order = subgroup_order,
+        weight = denominator
+      ),
+      .by = c(time_period_month, time_period_name_f, area_code)
+    ) |> 
+    tidyr::unnest(sii) |> 
+    dplyr::mutate(
+      text = glue::glue(
+        "<b>{time_period_name_f}</b>\n",
+        "Slope Index of Inequality: {round(estimate, digits = 1)}\n",
+        "95% Confidence Interval: {round(lowerci, digits = 1)} to {round(upperci, digits = 1)}"
+      )
+    )
+  
+  # store for later use (this is an expensive operation)
+  saveRDS(
+    object = df_dep_icb_sii,
+    file = here::here('data', 'project', 'df_dep_icb_sii_p009.Rds')
+  )
+}
+```
+
+```{r}
+#| fig-height: 7
+#| fig-cap: Geographical distribution of SII using crude rates of people hypertension monitoring with ACR
+
+# wrangling ---
+
+# read the pre-processed icb sii file
+# read the pre-processed icb sii file
+df_sii <-
+  readRDS(
+    file = here::here('data', 'project', 'df_dep_icb_sii_p009.Rds')
+  ) |> 
+  # sort by area code
+  dplyr::arrange(area_code, time_period_name_f) |> 
+  # add in ICB name
+  dplyr::left_join(
+    y = icb_sf |> 
+      dplyr::select(
+        ICB23CD,
+        area_name = ICB23NM
+      ) |> 
+      # shorten the ICB name a little
+      dplyr::mutate(
+        area_name = area_name |> 
+          stringr::str_replace(
+            pattern = "Integrated Care Board",
+            replacement = "ICB"
+          )
+      ),
+    by = dplyr::join_by(
+      area_code == ICB23CD
+    )
+  ) |> 
+  # prepare the hover text info
+  dplyr::mutate(
+    hover_label = glue::glue(
+      "<strong>{area_name}</strong></br>",
+      "{time_period_name_f}</br>",
+      "<strong>Slope Index of Inequality:</strong> {round(estimate, digits = 1)}%</br>",
+      "<strong>95% Confidence Interval:</strong> {round(lowerci, digits = 1)}% to {round(upperci, digits = 1)}%"
+    ),
+    hover_label_plotly = glue::glue(
+      "<b>{area_name}</b>\n",
+      "{time_period_name_f}\n",
+      "<b>Slope Index of Inequality:</b> {round(estimate, digits = 1)}%\n",
+      "<b>95% Confidence Interval:</b> {round(lowerci, digits = 1)}% to {round(upperci, digits = 1)}%"
+    )
+  )
+
+# define the colour palette for the choropleth
+pal <- leaflet::colorNumeric(
+  palette = "RdYlBu",
+  # use a balanced set to ensure zero is the mid-point
+  domain = seq(
+    from = ceiling(max(abs(df_sii$estimate)))*-1,
+    to = ceiling(max(abs(df_sii$estimate))),
+    by = 1
+  ),
+  reverse = FALSE
+)
+
+# define a vector to list the layers
+poly_layers <- c()
+
+# leaflet map ---
+
+# build the map
+icb_sf |> 
+  leaflet::leaflet() |> 
+  # add_leaflet_polygon(report_period = "To June 2022") |>
+  # add_leaflet_polygon(report_period = "To September 2022") |>
+  # add_leaflet_polygon(report_period = "To December 2022") |>
+  # add_leaflet_polygon(report_period = "To March 2023") |> 
+  # add_leaflet_polygon(report_period = "To June 2023") |> 
+  # add_leaflet_polygon(report_period = "To September 2023") |> 
+  # add_leaflet_polygon(report_period = "To December 2023") |> 
+  add_leaflet_polygon(report_period = "To March 2024") |> 
+  add_leaflet_polygon(report_period = "To June 2024") |>
+  add_leaflet_polygon(report_period = "To September 2024") |> 
+  leaflet::addLayersControl(
+    baseGroups = poly_layers,
+    options = leaflet::layersControlOptions(collapsed = FALSE)
+  ) |> 
+  leaflet::addLegend(
+    pal = pal,
+    values = df_sii$estimate,
+    opacity = 0.7,
+    title = "Key (%)",
+    position = "bottomleft",
+    labels = bins
+  )
+```
+
+
+This map presents a the SII for each ICB as a snapshot by each reporting period. The colours range from red-yellow-blue, where generally:
+  
+  -   red means a negative SII, which is where people with hypertension who live in areas of greater deprivation have higher rates of treated to appropriate threshold ,
+
+-   yellow means an SII equal to or around zero, which means greater equity of treated to monitored ACR with respect to deprivation, and
+
+-   blue means a positive SII, which is the area typically thought of as inequity of access where those who live in areas of highest deprivation have the lowest rates of hypertension monitoring with ACR.
+
+
+In March 2024 there are two ICBs with a red colour, Birmingham and Solihull ICB and South West London ICB, indicating higher deprivation correlates with higher rates of treated to appropriate threshold .
+
+The minority of ICBs appear to be coloured various shades of blue, indicating they have inequity in which those who live in areas of higher deprivation have lower rates of treatment to appropriate threshold.
+
+In June 2024 and September 2024 the orange is replaced by more yellow indicating that inequity still exists but to a lesser extent than the peak of March 2024.
 
 #### Focal ICBs
 
