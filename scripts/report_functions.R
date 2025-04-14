@@ -30,7 +30,7 @@ configure_plotly <- function(p) {
       )
     ) |>
     plotly::partial_bundle()
-
+  
   return(p)
 }
 
@@ -52,12 +52,12 @@ su_pal <- StrategyUnitTheme::su_theme_pal("main")
 #'
 #' @returns {plotly} subplot object
 plot_timeseries_agestandardised <- function(df, plot_title) {
-
+  
   # prepare the annotations
   df_annotate <-
     df |>
     dplyr::slice_max(time_period_month)
-
+  
   df_annotate_crude <-
     df_annotate |>
     dplyr::filter(
@@ -67,7 +67,7 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
         negate = TRUE
       )
     )
-
+  
   df_annotate_agestd <-
     df_annotate |>
     dplyr::filter(
@@ -77,10 +77,10 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
         negate = FALSE
       )
     )
-
+  
   # prepare the colours
   plot_colours <- su_pal(n = df$series |> levels() |> length())
-
+  
   # crude rate
   p1 <-
     df |>
@@ -96,7 +96,7 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
       plot_colours = plot_colours,
       y_axis_title = "Crude hypertension prevalence\n(percent)"
     )
-
+  
   # age-standardised rate
   p2 <-
     df |>
@@ -112,7 +112,7 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
       plot_colours = plot_colours,
       y_axis_title = "Age-standardised hypertension prevalence\n(percent)"
     )
-
+  
   # combine the two
   plot <-
     plotly::subplot(
@@ -124,9 +124,9 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
       showlegend = FALSE
     ) |>
     configure_plotly()
-
+  
   return(plot)
-
+  
 }
 
 #' Plot time-series for crude data
@@ -140,15 +140,15 @@ plot_timeseries_agestandardised <- function(df, plot_title) {
 #'
 #' @returns {plotly} object
 plot_timeseries <- function(df, plot_title, y_axis_title) {
-
+  
   # prepare the annotations
   df_annotate <-
     df |>
     dplyr::slice_max(time_period_month)
-
+  
   # prepare the colours
   plot_colours <- su_pal(n = df$series |> levels() |> length())
-
+  
   # plot
   plot <-
     df |>
@@ -163,7 +163,7 @@ plot_timeseries <- function(df, plot_title, y_axis_title) {
       showlegend = FALSE
     ) |>
     configure_plotly()
-
+  
   return(plot)
 }
 
@@ -184,8 +184,8 @@ plot_timeseries_single <- function(
     df_annotate,
     plot_colours,
     y_axis_title = "(percent)"
-  ) {
-
+) {
+  
   plot <-
     df |>
     plotly::plot_ly(
@@ -223,7 +223,7 @@ plot_timeseries_single <- function(
       ),
       showlegend = FALSE
     )
-
+  
   return(plot)
 }
 
@@ -240,7 +240,7 @@ plot_timeseries_single <- function(
 plot_focal_scheme_sii_timeseries <- function(
     .df_sii,
     .df_icb_focal
-  ) {
+) {
   # iterate over the focal icbs and generate a plotly::subplot
   
   # setup ---
@@ -336,7 +336,7 @@ plot_focal_scheme_sii_timeseries_single <- function(
     .df_focal,
     .col_marker,
     .col_line
-  ) {
+) {
   # create a single chart to be included in the subplot
   
   # setup ---
@@ -590,10 +590,10 @@ leaflet_highlight <- leaflet::highlightOptions(
 #'
 #' @returns `leaflet` map
 add_leaflet_polygon <- function(map, report_period) {
-
+  
   # add this layer to the poly_layers
   poly_layers <<- c(report_period, poly_layers) |> unique()
-
+  
   # get the report period data
   df <-
     df_sii |>
@@ -609,11 +609,11 @@ add_leaflet_polygon <- function(map, report_period) {
         area_code == ICB23CD
       )
     )
-
+  
   # prepare the labels
   labs <- df$hover_label |>
     lapply(htmltools::HTML)
-
+  
   # add the data as polygons to the map
   map <-
     map |>
@@ -633,7 +633,7 @@ add_leaflet_polygon <- function(map, report_period) {
         )
       )
     )
-
+  
   return(map)
-
+  
 }
