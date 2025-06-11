@@ -8,7 +8,7 @@ title-block-banner: '#151412'
 params:
   # should expensive calculations be re-calculated?
   # default = FALSE. Set to TRUE if running for the first time
-  flag_calc_expensive_operations: FALSE
+  flag_calc_expensive_operations: TRUE
 format:
   html:
     toc: true
@@ -33,8 +33,6 @@ bibliography: references.bib
 
 ```{r setup}
 #| include: false
-
-.libPaths(new = "C:/Users/craig.parylo/AppData/Local/Programs/R/R-4.4.2/library")
 
 # load data -----------------------------------------------------------
 
@@ -109,6 +107,7 @@ icb_sf <- sf::read_sf("https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest
 icb_sf <- icb_sf |> 
   #sf::st_simplify(dTolerance = 1000) # 2000 m
   rmapshaper::ms_simplify(keep = 0.05)
+
 # icb data ---
 # list focal icbs
 
@@ -116,6 +115,7 @@ icb_sf <- icb_sf |>
 #' London       
 #'    North Central London
 #'    North East London
+#'    South East London
 #' South West
 #'    Bristol, North Somerset and South Gloucestershire
 #'    Cornwall and the Isles of Scilly
