@@ -8,7 +8,7 @@ title-block-banner: '#151412'
 params:
   # should expensive calculations be re-calculated?
   # default = FALSE. Set to TRUE if running for the first time
-  flag_calc_expensive_operations: TRUE
+  flag_calc_expensive_operations: FALSE
 format:
   html:
     toc: true
@@ -404,7 +404,7 @@ output_metric_meta(.indicator_code = 'CVDP009HYP')
 
 ## Focal ICBs
 
-Special focus will be given to fourteen ICBs, called the focal ICBs, which have been selected as case studies. These ICBs are:
+Special focus will be given to fifteen ICBs, called the focal ICBs, which have been selected as case studies. These ICBs are:
 
 ```{r}
 #| fig-cap: Focal ICBs
@@ -777,7 +777,7 @@ df_metrics_icb |>
 
 There is a trend of increasing prevalence of hypertension in adults over time. Starting around 16.1% in June 2022 the average (median) value shows an increasing trend upwards, arriving at 16.9% in March 2024.
 
-Average prevalence jumped up between March 2024 and June 2024, increasing from 16.9% to 18.6%, finishing in September 2024 at 18.8%.
+Average prevalence jumped up between March 2024 and June 2024, increasing from 16.9% to 18.6%, finishing in December 2024 at 18.8%.
 
 Some ICBs could be left behind in the national trend upwards because their hypertension prevalence is not increasing at the same rate. There is disparity between ICBs as noted by the increasingly wide whiskers. In June 2022 hypertension prevalence ranged between11.4% and 20.0% (a difference of 8.6 percentage points) which widened by September 2024 to between 12.2% and 21.7% (a difference of 9.5 percentage points).
 
@@ -862,7 +862,7 @@ Taking age-standardised prevalence into account there is similar rate of increas
 
 The jump of 1.2 percentage points (pp) average prevalence between March 2024 and June 2024 is noticeable, echoing a similar leap of 1.7pp in the crude prevalence rates in this period.
 
-There may less variation among ICBs when taking age into account. We observe narrower ranges in this age-standardised view compared with the crude rates, indicating less variation among ICBs, particularly in the latest periods, June 2024 and September 2024.
+There may less variation among ICBs when taking age into account. We observe narrower ranges in this age-standardised view compared with the crude rates, indicating less variation among ICBs, particularly in the latest periods, June 2024, September 2024 and December 2024.
 
 ### Deprivation breakdowns
 
@@ -909,7 +909,7 @@ df_dep_icb |>
 
 There is a relationship between deprivation and hypertension prevalence, with the most deprived group having a lower range of values than those in the less deprived groups (groups 4 and 5) across each reporting period.
 
-The jump in average prevalence rates identified from the national view (see @sec-prevalence) between March 2024 and June 2024, is also notable from this view as a sudden right-shift in value between these two time points followed by a slight reduction across all deprivation quintiles in September 2024.
+The jump in average prevalence rates identified from the national view (see @sec-prevalence) between March 2024 and June 2024, is also notable from this view as a sudden right-shift in value between these two time points followed by a slight reduction across all deprivation quintiles in September and December 2024.
 
 Looking at the England-wide prevalence rates per deprivation quintile over time illustrates the trends clearly.
 
@@ -1141,6 +1141,14 @@ To appreciate how the SII applies to this measure here is an example slope as ca
 #| fig-height: 6
 #| fig-cap: Inequality of crude hypertension prevalence by deprivation quintile - example month
 
+# get the latest reporting period name
+temp_time_period <- 
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::pull(time_period_name) |> 
+  unique() |> 
+  stringr::str_remove(pattern = "To ")
+
 # get the latest reporting period
 df <-
   df_dep_eng |> 
@@ -1213,7 +1221,7 @@ df |>
     showarrow = FALSE
   ) |> 
   plotly::layout(
-    title = "Crude hypertension prevalence - September 2024",
+    title = glue::glue("Crude hypertension prevalence - {temp_time_period}"),
     font = plotly_font_family,
     legend = list(orientation = "h"),
     xaxis = list(title = ""),
@@ -1225,13 +1233,13 @@ df |>
   configure_plotly()
 ```
 
-This example using data from September 2024 illustrates the SII process. The calculated prevalence is plotted for each deprivation quintile and a regression line fitted to these points.
+This example using data from `r temp_time_period` illustrates the SII process. The calculated prevalence is plotted for each deprivation quintile and a regression line fitted to these points.
 
 In this example the line is a linear regression using the least squares method, though it is also common to fit a logistic regression of log-prevalence which can give better results for outcomes expressed as a percentage, as in this case of hypertension prevalence.
 
 The SII represents the difference in the fitted regression line between the most deprived and the least deprived groups.
 
-For September 2024 the regression line slopes upward indicating the crude hypertension prevalence is higher for people living in areas of the least deprived quintile.
+For `r temp_time_period` the regression line slopes upward indicating the crude hypertension prevalence is higher for people living in areas of the least deprived quintile.
 
 ```{r}
 #| fig-height: 6
@@ -1312,13 +1320,21 @@ There was a reduction in inequality noted between March 2020 and September 2021 
 
 Afterwards the is an increase in inequality, increasing in each reporting period from September 2022 right up to June 2024.
 
-September 2024's data indicates a reduction in inequality from June 2024's peak, falling from 4 to 3.9 percent.
+September 2024's data indicates a reduction in inequality from June 2024's peak, falling from 4 to 3.9 percent, remaining at 3.9% in December 2024's data.
 
 #### Age-standardised prevalence {#sec-age-standardised-prevalence}
 
 ```{r}
 #| fig-height: 6
 #| fig-cap: Inequality of age-standardised hypertension prevalence by deprivation quintile - example month
+
+# get the latest reporting period name
+temp_time_period <- 
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::pull(time_period_name) |> 
+  unique() |> 
+  stringr::str_remove(pattern = "To ")
 
 # get the latest reporting period
 df <-
@@ -1410,7 +1426,7 @@ df |>
     showarrow = FALSE
   ) |> 
   plotly::layout(
-    title = "Age-standardised hypertension prevalence - September 2024",
+    title = glue::glue("Age-standardised hypertension prevalence - {temp_time_period}"),
     font = plotly_font_family,
     legend = list(orientation = "h"),
     xaxis = list(title = ""),
@@ -1422,7 +1438,7 @@ df |>
   configure_plotly()
 ```
 
-For September 2024 the regression line slopes downward indicating the age-standardised hypertension prevalence is greater for people living in areas of greater deprivation.
+For `r temp_time_period` the regression line slopes downward indicating the age-standardised hypertension prevalence is greater for people living in areas of greater deprivation.
 
 ```{r}
 #| fig-height: 6
@@ -1524,7 +1540,7 @@ df |>
 
 The SII measure of inequality remained almost static at -6.2 to -6.1 percent between March 2023 and March 2024.
 
-There was an increase in inequality observed between March 2024 and June 2024, where the SII changed from -6.1 to -6.8 percent, and remained at this level in September 2024.
+There was an increase in inequality observed between March 2024 and June 2024, where the SII changed from -6.1 to -6.8 percent, and remained at this level in September and December 2024.
 
 ### Geography
 
@@ -1668,6 +1684,7 @@ icb_sf |>
   add_leaflet_polygon(report_period = "To March 2024") |> 
   add_leaflet_polygon(report_period = "To June 2024") |>
   add_leaflet_polygon(report_period = "To September 2024") |> 
+  add_leaflet_polygon(report_period = "To December 2024") |> 
   leaflet::addLayersControl(
     baseGroups = poly_layers,
     options = leaflet::layersControlOptions(collapsed = FALSE)
@@ -1684,13 +1701,13 @@ icb_sf |>
 
 The trend for greater inequality is represented by increasing numbers of ICBs turning from yellow to orange and red colours as you move down the different time periods, particularly noticeable in movement from March 2024 to June 2024.
 
-Not all ICBs move in the same direction, however. One example is Birmingham and Solihull ICB which starts the series in March 2023 with a deep red colour (-12% SII) in contrast with the surrounding ICBs yellow and orange hues. Over time this ICB reduces inequality resulting in a mid-orange (-9.3% SII) by September 2024.
+Not all ICBs move in the same direction, however. One example is Birmingham and Solihull ICB which starts the series in March 2023 with a deep red colour (-12% SII) in contrast with the surrounding ICBs yellow and orange hues. Over time this ICB reduces inequality resulting in a mid-orange (-9.3% SII) by December 2024.
 
-Some ICBs retain relatively static levels of inequality. An example is Cornwall and the Isles of Scilly ICB which starts in March 2023 with -2.3% SII, one of more equal ICBs by deprivation, which ends the series in September 2024 with -2.0% SII having undergone very little change over the time period.
+Some ICBs retain relatively static levels of inequality. An example is Cornwall and the Isles of Scilly ICB which starts in March 2023 with -2.3% SII, one of more equal ICBs by deprivation, which ends the series in December 2024 with -2.0% SII having undergone very little change over the time period.
 
 #### Focal ICBs
 
-This chart shows the SII metric over successive time periods across our fourteen focal ICBs using age-standardised hypertension prevalence.
+This chart shows the SII metric over successive time periods across our focal ICBs using age-standardised hypertension prevalence.
 
 ```{r}
 #| fig-height: 60
@@ -1709,13 +1726,13 @@ plot_list
 
 Most ICBs maintain relatively stable metrics of inequality (SII) over this time period.
 
-Some ICBs show signs of increasing inequality, such as `NHS Hampshire and Isle of Wight ICB` which had one of the most equal deprivation scores until March 2024 (-2.4% SII) after which inequality appears to have increased to -4.6% SII, putting the ICB within the middle of the pack.
+Some ICBs show signs of increasing inequality, such as:
 
-Examples of improved equality are rarer but still visible in this set:
+-   `NHS Hampshire and Isle of Wight ICB` which had one of the most equal distribution of hypertension prevalence among deprivation quintiles until March 2024 (-2.4% SII) after which inequality appears to have increased to -4.6% SII by December 2024, putting the ICB within more in line with other ICBs,
 
--   `NHS Cornwall and the Isles of Scilly` which improved from -2.3% in March 2023 to -2% in September 2024,
+-   `NHS South East London ICB` had one of the most unequal distribution of hypertension prevalence throughout the time series which started with -9.4% SII in March 2023 and increased to -10.5% SII by December 2024.
 
--   `NHS North Central London ICB` which improved from -8.7% in March 2023 to -8.3% in September 2024.
+Examples of improved equality are rarer but still visible in this set, such as `NHS Cornwall and the Isles of Scilly` which improved from -2.3% in March 2023 to -2% in December 2024.
 
 ## CVDP002HYP
 
@@ -1778,9 +1795,9 @@ The main point to note from this chart is that once diagnosed up to 69% of peopl
 
 There is a dramatic fall in the rate between March 2020 and March 2021, where the proportion of people treated to threshold fell from 67.5% to 46.1%.
 
-The trend since March 2021, however, is upwards, peaking at 68.5% in March 2024 before falling slightly to 63.8% in June 2024 and 63.7% in September 2024.
+The trend since March 2021, however, is upwards, peaking at 68.5% in March 2024 before falling slightly to 63.8% in June 2024 and 63.7% in December 2024.
 
-Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 5.07 million (M) people in March 2020 to 7.09 M by September 2024.
+Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 5.07 million (M) people in March 2020 to 7.16 M by December 2024.
 
 #### Gender
 
@@ -1862,13 +1879,13 @@ df |>
 
 There is a clear pattern demonstrated here that as age-group increases so too does the likelihood for hypertension to be treated within limits. However, this relationship is not so nearly as strong as that observed between hypertension prevalence and age group (see @sec-national-trends).
 
-Despite this narrower gap in treatment rate between the age groups, there are still notable differences in the denominators. In September 2024 the:
+Despite this narrower gap in treatment rate between the age groups, there are still notable differences in the denominators. In December 2024 the:
 
--   `60-79` age group had 4.69 M people in the denominator,
+-   `60-79` age group had 4.73 M people in the denominator,
 
--   `40-59` age group had 2.18 M people in the denominator, around half of the `60-79` group,
+-   `40-59` age group had 2.21 M people in the denominator, around half of the `60-79` group,
 
--   `18-39` age group had only 0.21 M people in the denominator, around 4% of the `60-79` group.
+-   `18-39` age group had only 0.22 M people in the denominator, around 4% of the `60-79` group.
 
 Use of the crude treatment rates appears to present fewer issues than it did when looking at hypertension prevalence. The age groups are much closer in their treatment rates which means any differences in age profile between geographical areas are less likely to result in large effects on the overall treatment rate for the area.
 
@@ -1995,7 +2012,7 @@ df |>
 
 There are only three reporting periods available for this relatively new metric, introduced in March 2024.
 
-It appears that people with a Serious Mental Illness are more likely to be treated to threshold than people without, (66.9% vs 63.7%, September 2024). However, the denominators show that there are far fewer people with SMI (0.11 M) than those without (6.97 M).
+It appears that people with a Serious Mental Illness are more likely to be treated to threshold than people without, (67% vs 64%, December 2024). However, the denominators show that there are far fewer people with SMI (0.14 M) than those without (7.05 M).
 
 #### LD
 
@@ -2036,7 +2053,7 @@ df |>
   )
 ```
 
-This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to achieve treatment to threshold than those without (70.1% vs 63.7%, September 2024).
+This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to achieve treatment to threshold than those without (69.8% vs 64.0%, September 2024).
 
 #### Age ∩ Gender
 
@@ -2171,7 +2188,7 @@ Interestingly, people living in areas of the highest deprivation are least likel
 
 This relationship seems to hold throughout successive time periods.
 
-The trend for increasing rate of treatment to threshold is also visible here as the box plots move rightward (higher) between June 2022 and March 2023, the plateau between June 2023 and December 2023 followed by a spike and then fall backward for June 2024 and September 2024.
+The trend for increasing rate of treatment to threshold is also visible here as the box plots move rightward (higher) between June 2022 and March 2023, the plateau between June 2023 and December 2023 followed by a spike and then fall backward for June 2024 which is maintained in September and December 2024.
 
 ```{r}
 #| fig-height: 7
@@ -2259,6 +2276,14 @@ To appreciate how the SII applies to this measure here is an example slope as ca
 #| fig-height: 6
 #| fig-cap: Inequality of crude rate of treatment to threshold (<80 years) by deprivation quintile - example month
 
+# get the latest reporting period name
+temp_time_period <- 
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::pull(time_period_name) |> 
+  unique() |> 
+  stringr::str_remove(pattern = "To ")
+
 # get the latest reporting period
 df <-
   df_dep_eng |> 
@@ -2331,7 +2356,7 @@ df |>
     showarrow = FALSE
   ) |> 
   plotly::layout(
-    title = "Crude hypertension prevalence - September 2024",
+    title = glue::glue("Crude hypertension prevalence - {temp_time_period}"),
     font = plotly_font_family,
     legend = list(orientation = "h"),
     xaxis = list(title = ""),
@@ -2541,6 +2566,7 @@ icb_sf |>
   add_leaflet_polygon(report_period = "To March 2024") |> 
   add_leaflet_polygon(report_period = "To June 2024") |>
   add_leaflet_polygon(report_period = "To September 2024") |> 
+  add_leaflet_polygon(report_period = "To December 2024") |> 
   leaflet::addLayersControl(
     baseGroups = poly_layers,
     options = leaflet::layersControlOptions(collapsed = FALSE)
@@ -2571,7 +2597,7 @@ The majority of ICBs appear to be coloured various shades of blue, indicating th
 
 By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue, indicating greater inequity of access for people living in areas of highest deprivation.
 
-In June 2024 and September 2024 the darker blue is replaced by more lighter shades indicating that inequity still exists but to a lesser extent than the peak of March 2023.
+In June, September and December 2024 the darker blue is replaced by more lighter shades indicating that inequity still exists but to a lesser extent than the peak of March 2023.
 
 #### Focal ICBs
 
@@ -2650,9 +2676,9 @@ The main point to note from this chart is that GP hypertension with a record of 
 
 There is a dramatic fall in the rate between March 2020 and March 2021, where the proportion of people treated to threshold fell from 81.6% to 57.5%.
 
-The trend since March 2021, however, is upwards, peaking at 80.3% in March 2024 before falling slightly to 78.7% in June 2024 and 78.6% in September 2024.
+The trend since March 2021, however, is upwards, peaking at 80.3% in March 2024 before falling slightly to 78.7% in June 2024, 78.6% in September 2024 and 79.0% in December 2024.
 
-Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 1.35 million (M) people in March 2020 to 1.87 M by September 2024.
+Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 1.35 million (M) people in March 2020 to 1.88 M by December 2024.
 
 #### Gender
 
@@ -2693,7 +2719,7 @@ df |>
 
 The trends for each gender are broadly similar to the overall trends noted above. Men tend to have a higher crude rate of treated to threshold than men for all reporting periods.
 
-The denominators for both groups are broadly similar in each reporting period, however, there tend to be more men with hypertension than women.
+There are more women than men with hypertension in this age group, and the numbers increase over time, with each reporting period showing a higher denominator than the previous one.
 
 #### Age
 
@@ -2731,9 +2757,6 @@ df |>
     y_axis_title = "People with hypertension treated to threshold\n(percent)"
   )
 ```
-
-From March 2020 to September 2024 (81.6% to less than equal 80%), 80+ age group with hypertension seems to  have a decreasing to be treated to threshold
-
 
 #### Ethnicity
 
@@ -2813,7 +2836,7 @@ df |>
   )
 ```
 
-There is a clear relationship between deprivation quintile and treatment to threshold. People living in areas of higher deprivation and those living in areas of least deprivation are likely to be treatment to threshold at 78%.
+Deprivation has little impact on hypertension being treated to threshold in this age group. People from more deprived areas are only slightly less likely to be treated to threshold, with the differences between areas being relatively small.
 
 #### SMI
 
@@ -2852,10 +2875,9 @@ df |>
   )
 ```
 
-There are only three reporting periods available for this relatively new metric, introduced in March 2024.
+There are only four reporting periods available for this relatively new metric, introduced in March 2024.
 
-It appears that people with a Serious Mental Illness are more likely to be treated to threshold than people without, (80.1% vs 78.6%, September 2024). However, the denominators show that there are far fewer people with SMI (17.85 k) than those without (1.85 M).
-
+It appears that people with a Serious Mental Illness are more likely to be treated to threshold than people without, (80% vs 79%, December 2024). However, the denominators show that there are far fewer people with SMI (17.65 k) than those without (1.87 M).
 
 #### LD
 
@@ -2894,7 +2916,7 @@ df |>
   )
 ```
 
-This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to be treated to threshold than those without (80.5% vs 78.6%, September 2024).
+This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability (LD) are slightly more likely to be treated to threshold than those without (80% vs 79%, December 2024). The gap between those with and without LD closed in the latter part of the time series, mostly driven by a fall in performance on this metric for those with LD.
 
 #### Age ∩ Gender
 
@@ -3029,6 +3051,14 @@ To appreciate how the SII applies to this measure here is an example slope as ca
 #| fig-height: 6
 #| fig-cap: Inequality of crude rate of treatment to threshold (>80 years) by deprivation quintile - example month
 
+# get the latest reporting period name
+temp_time_period <- 
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::pull(time_period_name) |> 
+  unique() |> 
+  stringr::str_remove(pattern = "To ")
+
 # get the latest reporting period
 df <-
   df_dep_eng |> 
@@ -3096,12 +3126,12 @@ df |>
   ) |> 
   plotly::add_annotations(
     x = ~ 3,
-    y = ~ 55,
+    y = ~ 70,
     text = glue::glue("<b>Slope Index of Inequality</b>\n{round(df_sii$estimate, digits = 1)}%"),
     showarrow = FALSE
   ) |> 
   plotly::layout(
-    title = "Crude hypertension treatment to threshold (80+ yrs) - September 2024",
+    title = glue::glue("Crude hypertension treatment to threshold (80+ yrs) - {temp_time_period}"),
     font = plotly_font_family,
     legend = list(orientation = "h"),
     xaxis = list(title = ""),
@@ -3188,13 +3218,9 @@ df |>
   configure_plotly()
 ```
 
-There was a general trend of fluctuation inequality overtime. an increase was observed between March 2020 and March 2021, from 0.6% to 2% but afterwards there is a reduction in inequality to 0.6% in March 2022.
+Although the time series data appear uneven, with fluctuations and spikes, the overall variation is relatively small, at less than 2% SII.
 
-The percentage begin to increase again between June 2022 and March 2024 (0.6% to 1.6%).
-
-There were two points of exceptions, a sharp fall after reached high percentage in inequality in March 2021 and March 2024.
-
-The confidence intervals are much tighter in this plot than those seen in the age-standardised hypertension prevalence (see @sec-age-standardised-prevalence), indicating there is much less uncertainty about these SII estimates.
+The data from June to December 2024 shows greater consistency and equality, particularly after the significant drop between March and June 2024, compared to the earlier time series.
 
 ### Geography
 
@@ -3313,6 +3339,7 @@ icb_sf |>
   add_leaflet_polygon(report_period = "To March 2024") |> 
   add_leaflet_polygon(report_period = "To June 2024") |>
   add_leaflet_polygon(report_period = "To September 2024") |> 
+  add_leaflet_polygon(report_period = "To December 2024") |> 
   leaflet::addLayersControl(
     baseGroups = poly_layers,
     options = leaflet::layersControlOptions(collapsed = FALSE)
@@ -3335,15 +3362,11 @@ This map presents a the SII for each ICB as a snapshot by each reporting period.
 
 -   blue means a positive SII, which is the area typically thought of as inequity of access where those who live in areas of highest deprivation have the lowest rates of treatment to threshold.
 
-In June 2022 there is one ICB with a strong red colour, Birmingham and Solihull ICB, indicating higher deprivation correlates with higher rates of treatment to threshold.
+In June 2022, most areas (coloured in shades of blue) had lower rates of treatment to threshold for people living in more deprived areas, while one area (Birmingham and Solihull) had higher rates of treatment to threshold for those living in more deprived areas (coloured red).
 
-A small number of ICBs have yellow/orange colours signifying more or less equality of access.
+By March 2024, inequality had increased, with many areas (coloured blue or deeper blue) indicating lower rates of treatment to threshold for people in more deprived areas.
 
-The majority of ICBs appear to be coloured various shades of blue, indicating they have inequity in which those who live in areas of higher deprivation have lower rates of treatment to threshold.
-
-By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue, indicating greater inequity of access for people living in areas of highest deprivation.
-
-In June 2024 and September 2024 the darker blue is replaced by more yellow/orange indicating that inequity is getting worse than the peak of March 2023.
+However, by December 2024, the situation had improved, with most areas (coloured yellow or pale blue) showing more equal rates of treatment to threshold, regardless of deprivation level.
 
 #### Focal ICBs
 
@@ -3418,13 +3441,11 @@ df |>
   )
 ```
 
-The main point to note from this chart is that GP hypertension with a record of a blood pressure reading reached the highest percentage up to 88.7% of people aged 18 and over were recorded over this period.
+The proportion of people with hypertension and a recorded blood pressure reading experienced a significant decline between March 202- and March 2021, dropping from 88.7% to 63.5%.
 
-There is a dramatic fall in the rate between March 2020 and March 2021, where the proportion of people with recorded hypertension blood pressure reading fell from 88.7% to 63.5%.
+However, since then, the trend has been upward, with the proportion reaching a peak of 88.6% in March 2024, decreasing slightly in June and September 2024 and ending at 87.9% in December 2024.
 
-The trend since March 2021, however, is upwards, peaking at 88.6% in March 2024 before falling slightly to 87.4% in June 2024 and 87% in September 2024.
-
-Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 6.42 million (M) people in March 2020 to 8.95 M by September 2024.
+Over the same period, the total number of people with hypertension has increased steadily, from y6.42 million in March 2020 to 9.04 million in December 2024.
 
 #### Gender
 
@@ -3465,7 +3486,7 @@ df |>
 
 The trends for each gender are broadly similar to the overall trends noted above. Women tend to have a higher crude rate of blood pressure reading record (recorded hypertension) than men for all reporting periods.
 
-The denominators for both groups are broadly similar in each reporting period, however, there tend to be more men with hypertension than women. This fits with the national literature (see Section 2.1) that below the age of 65 years men tend to have higher blood pressure than women, with the inference than men are more likely to be diagnosed with hypertension.
+The denominators for men and women are broadly similar in each reporting period.
 
 #### Age
 
@@ -3504,17 +3525,17 @@ df |>
   )
 ```
 
-There is a clear pattern demonstrated here that as age-group increases so too does the likelihood for hypertension to be treated within limits. However, this relationship is not so nearly as strong as that observed between hypertension prevalence and age group (see @sec-national-trends).
+As age increases so too does the likelihood for people with hypertension to have a recorded blood pressure reading in the previous 12 months.
 
-Despite this narrower gap in BP reading record rate between the age groups, there are still notable differences in the denominators. In September 2024 the:
+There are notable differences in the denominators. In December 2024 the:
 
--   `60-79` age group had 4.69 M people in the denominator,
+-   `80+` age group had 1.88 M people with hypertension,
 
--   `40-59` age group had 2.18 M people in the denominator, around half of the `60-79` group,
+-   `60-79` age group had 4.73 M people with hypertension,
 
--   `18-39` age group had only 0.21 M people in the denominator, around 4% of the `60-79` group.
+-   `40-59` age group had 2.21 M people with hypertension,
 
-Use of the crude BP reading record rates appears to present fewer issues than it did when looking at hypertension prevalence. The age groups are much closer in their blood pressure reading record rates which means any differences in age profile between geographical areas are less likely to result in large effects on the overall BP reading record rate for the area.
+-   `18-39` age group had only 0.22 M people with hypertension.
 
 #### Ethnicity
 
@@ -3548,14 +3569,12 @@ df <-
 # plot the result
 df |> 
   plot_timeseries(
-    plot_title = "England recorded hypertension with a record of blood pressure reading (CVDP004HYP) - broad ethnic group",
+    plot_title = "England recorded hypertension with a BP reading (CVDP004HYP) - ethnicity",
     y_axis_title = "People with recorded hypertension blood pressure reading\n(percent)"
   )
 ```
 
 The relationship between ethnicity and blood pressure reading is not clear from this visualisation.
-
-There are disparities with some groups recording consistently lower rates, such as people with a `Black` broad ethnic background as well as those whose ethnicity is `Missing` from their GP record or who refused to provide this information for their GP record (`Not stated`), in contrast to people of `Asian` or `White` broad ethnic backgrounds who generally appear to achieve higher rates of blood pressure reading record.
 
 #### Deprivation
 
@@ -3589,20 +3608,18 @@ df <-
 # plot the result
 df |> 
   plot_timeseries(
-    plot_title = "England recorded hypertension with a record of blood pressure reading (CVDP004HYP) - deprivation",
+    plot_title = "England recorded hypertension with BP reading (CVDP004HYP) - deprivation",
     y_axis_title = "People with recorded hypertension blood pressure reading\n(percent)"
   )
 ```
 
-There is a clear relationship between deprivation quintile and blood pressure reading records. People living in areas of higher deprivation consistently achieve lower rates of recorded blood pressure reading compared with those living in areas of least deprivation.
-
-Moreover, there appears to be a step-wise correlation between deprivation quintile and blood pressure reading records, with people living in areas of higher deprivation less likely to achieve recorded hypertention with a blood pressure records.
+Deprivation appears to have little impact on the proportion of people with hypertension with a blood pressure reading recorded in the previous 12 months. The results are very for each deprivation quintile across the time series.
 
 #### SMI
 
 ```{r}
 #| fig-height: 8
-#| fig-cap: Timeseries of the rate of people with  blood pressure reading record (recorded hypertension) in England by mental health status
+#| fig-cap: Timeseries of the rate of people with a blood pressure reading record (recorded hypertension) in England by mental health status
 
 # prepare the data for plotting
 df <-
@@ -3635,9 +3652,11 @@ df |>
   )
 ```
 
-There is a clear relationship between deprivation quintile and record of a blood pressure reading. People living in areas of higher deprivation consistently achieve lower rates of treatment to threshold compared with those living in areas of least deprivation.
+The metric for blood pressure reading in people with hypertension with and without a serious mental illness (SMI) is relatively new, with only four reporting periods available since its introduction in March 2024. The data show that:
 
-Moreover, there appears to be a step-wise correlation between deprivation quintile and record of a blood pressure reading, with people living in areas of higher deprivation less likely to achieve treatment to threshold.
+-   People with SMI and hypertension are more likely to have had their blood pressure recorded in the previous 12 months compared with people without a SMI (91.6% vs 87.8%, December 2024).
+
+-   However, there is a significant difference in the number of people in each group, with only 132 thousand people having a SMI compared with 8.91 million people without a SMI (as of December 2024).
 
 #### LD
 
@@ -3676,7 +3695,11 @@ df |>
   )
 ```
 
-This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to achieve recorded hypertension with a blood pressure reading record than those without (92.8% vs 87%, September 2024).
+The metric for blood pressure reading in people with hypertension with and without a learning disability (LD) show that:
+
+-   People with LD and hypertension are more likely to have had their blood pressure recorded in the previous 12 months compared with people without a LD (93.0% vs 87.8%, December 2024).
+
+-   However, there is a significant difference in the number of people in each group, with only 38 thousand people having a LD compared with 9.01 million people without a LD (as of December 2024).
 
 #### Age ∩ Gender
 
@@ -3815,6 +3838,14 @@ To appreciate how the SII applies to this measure here is an example slope as ca
 #| fig-height: 6
 #| fig-cap: Inequality of crude rate of blood pressure reading record by deprivation quintile - example month
 
+# get the latest reporting period name
+temp_time_period <- 
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::pull(time_period_name) |> 
+  unique() |> 
+  stringr::str_remove(pattern = "To ")
+
 # get the latest reporting period
 df <-
   df_dep_eng |> 
@@ -3882,12 +3913,12 @@ df |>
   ) |> 
   plotly::add_annotations(
     x = ~ 3,
-    y = ~ 55,
+    y = ~ 80,
     text = glue::glue("<b>Slope Index of Inequality</b>\n{round(df_sii$estimate, digits = 1)}%"),
     showarrow = FALSE
   ) |> 
   plotly::layout(
-    title = "Crude recorded hypertension with record of a blood pressure reading  - September 2024",
+    title = glue::glue("Rate of hypertension with BP reading record - {temp_time_period}"),
     font = plotly_font_family,
     legend = list(orientation = "h"),
     xaxis = list(title = ""),
@@ -3974,11 +4005,7 @@ df |>
   configure_plotly()
 ```
 
-There was a general trend of increasing inequality between March 2020 and March 2024, from 0.5% to 2.5%. There were three points of exceptions, a higher increase in inequality in March 2023 and a fall in inequality in June 2022 and September 2023.
-
-There is a fall in inequality between March 2021 and June 2022 (from 1.5 to 0.6%).
-
-The confidence intervals are much tighter in this plot than those seen in the age-standardised hypertension prevalence (see @sec-age-standardised-prevalence), indicating there is much less uncertainty about these SII estimates.
+There was a general trend of increasing inequality between March 2020 and March 2024, from 0.5% to a peak 2.5% SII. Following this, SII shows a steadily decrease, indicative of greater equality between people across deprivation quintiles, from June to December 2024 (1.8% to 1.4%).
 
 ### Geography
 
@@ -4098,6 +4125,7 @@ icb_sf |>
   add_leaflet_polygon(report_period = "To March 2024") |> 
   add_leaflet_polygon(report_period = "To June 2024") |>
   add_leaflet_polygon(report_period = "To September 2024") |> 
+  add_leaflet_polygon(report_period = "To December 2024") |> 
   leaflet::addLayersControl(
     baseGroups = poly_layers,
     options = leaflet::layersControlOptions(collapsed = FALSE)
@@ -4120,15 +4148,13 @@ This map presents a the SII for each ICB as a snapshot by each reporting period.
 
 -   blue means a positive SII, which is the area typically thought of as inequity of access where those who live in areas of highest deprivation have the lowest rates of blood pressure reading record (recorded hypertension).
 
-In June 2022 there is one ICB with a strong red colour, Birmingham and Solihull ICB, indicating higher deprivation correlates with higher rates of BP reading record (recorded hypertension).
+This illustrates a shift in the relationship between deprivation and rates of blood pressure recording for people with hypertension over time.
 
-A small number of ICBs have yellow/orange colours signifying more or less equality of access.
+In June 2022, most areas (coloured in shades of blue) had lower rates of BP recording for people in more deprived areas, while one area (Birmingham and Solihull) had higher rates of BP recording for people in deprived areas.
 
-The majority of ICBs appear to be coloured various shades of blue, indicating they have inequity in which those who live in areas of higher deprivation have lower rates of blood pressure reading record.
+By March 2023, the inequity had increased, with nearly all areas (coloured blue or deeper blue) showing lower BP recording rates for people in more deprived areas.
 
-By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue, indicating greater inequity of access for people living in areas of highest deprivation.
-
-In June 2024 and September 2024 the darker blue is replaced by more lighter shades indicating that inequity still exists but to a lesser extent than the peak of March 2023.
+However, from June 2024 to December 2024, there was an improvement, with the darker shades of blue being replaced by lighter shades, indicating that while inequity still exists, it is less pronounced that it was at its peak in March 2023.
 
 #### Focal ICBs
 
@@ -4197,11 +4223,9 @@ df |>
   )
 ```
 
-The main point to note from this chart is that GP hypertension with a record of a high risk – one high blood pressure with no recorded hypertension reached the highest percentage up to 2% of people aged 18+ over this period.
+The trend since March 2021 is upwards, starting at 1.2% in March 2021 and peaking at 2% in September 2024.
 
-The trend since March 2021 is upwards, Starting at 0.6% in March 2021 and peaking at 2% in September 2024
-
-Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 45.8 million (M) people in March 2021 to 50.15 M by September 2024.
+Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 45.8 million people in March 2021 to 50.67 million by December 2024.
 
 #### Gender
 
@@ -4240,9 +4264,9 @@ df |>
   )
 ```
 
-The trends for each gender are broadly similar to the overall trends noted above. Men tend to have a higher crude rate of high risk – one high blood pressure than Woman for all reporting periods.
+There is a trend of increasing rates of people with one high blood pressure reading but no recorded hypertension, and this trend is observed in both men and women.
 
-The denominators for both groups are broadly similar in each reporting period, however, there tend to be more men with hypertension than women. This fits with the national literature (see Section 2.1) that below the age of 65 years men tend to have higher blood pressure than women, with the inference than men are more likely to be diagnosed with hypertension.
+The rate of increase is slightly higher for men than for women, with the difference between the two groups growing from 0.1% in March 2021 to 0.3% by December 2024.
 
 #### Age
 
@@ -4281,17 +4305,7 @@ df |>
   )
 ```
 
-The pattern demonstrated here is not the same as previous metric which indicated that as age-group increases so too does the likelihood for hypertension,with the highest rates for the 60-79 years group, followed by the second youngest (40-59), then by the oldest group (80+) finally by the youngest group (18-39). This high risk – one high blood pressure (no recorded hypertension) seems to be different from previous findings in age group (see @sec-national-trends).it seems to be that this outcome contain people with no recorded hypertension.
-
-Despite this small gap in high risk – one high blood pressure (no recorded hypertension) between the age groups, there are still notable differences in the denominators. In September 2024 the:
-
--   `18-39` age group had 19 M people in the denominator,
-
--   `60-79` age group had 11.81 M people in the denominator, around 60% of the `18-39` group,
-
--   `80+` age group had only 3.3 M people in the denominator, around 17% of the `18-39` group.
-
-Use of the crude high risk – one high blood pressure (no recorded hypertension) rates appears to present fewer issues than it did when looking at hypertension prevalence. The age groups are much closer in their high risk – one high blood pressure (no recorded hypertension) rates which means any differences in age profile between geographical areas are less likely to result in large effects on the overall high risk – one high blood pressure (no recorded hypertension) rate for the area.
+The data shows a time-based trend of increasing rates of people with one high blood pressure reading but no recorded hypertension diagnosis. This trend is most pronounced in the 60-70 and 49-59 years age groups.
 
 #### Deprivation
 
@@ -4329,9 +4343,6 @@ df |>
     y_axis_title = "People with high risk – one high blood pressure no recorded hypertension \n(percent)"
   )
 ```
-
-The relationship between deprivation and high risk – one high blood pressure with no recorded hypertension is more complex, for example the most deprived group does not consistently have the higher rate with Quintile 4 often being the highest. Similarly for Quntiles 5 and 2 for the lowest rates for this outcome.
-
 
 #### Age ∩ Gender
 
@@ -4371,12 +4382,6 @@ plot_intersection_timeseries(
   .y_axis_title = "Crude rate\n(percent)"
 )
 ```
-
-Men aged 18-39 and 40-59 are slightly more likely than Women in these age groups to have routine high risk - high blood pressure.
-
-In the 60-70 age group, Men are equally likely to have high risk - high blood pressure.
-
-In the 80+ years age group we observe women are slightly more likely than men to have their high risk - high blood pressure.
 :::
 
 ### Distributions over time
@@ -4470,6 +4475,14 @@ To appreciate how the SII applies to this measure here is an example slope as ca
 #| fig-height: 6
 #| fig-cap: Inequality of crude rate of high risk – one high blood pressure with no recorded hypertension by deprivation quintile - example month
 
+# get the latest reporting period name
+temp_time_period <- 
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::pull(time_period_name) |> 
+  unique() |> 
+  stringr::str_remove(pattern = "To ")
+
 # get the latest reporting period
 df <-
   df_dep_eng |> 
@@ -4537,12 +4550,12 @@ df |>
   ) |> 
   plotly::add_annotations(
     x = ~ 3,
-    y = ~ 1.5,
+    y = ~ 1.8,
     text = glue::glue("<b>Slope Index of Inequality</b>\n{round(df_sii$estimate, digits = 1)}%"),
     showarrow = FALSE
   ) |> 
   plotly::layout(
-    title = "Crude high risk – one high blood pressure with no recorded hypertension - September 2024",
+    title = glue::glue("One high blood pressure with no recorded hypertension - {temp_time_period}"),
     font = plotly_font_family,
     legend = list(orientation = "h"),
     xaxis = list(title = ""),
@@ -4629,9 +4642,9 @@ df |>
   configure_plotly()
 ```
 
-There was a general trend of increasing inequality between March 2020 and March 2024, from -0.1% to 0. The points were center closely around 0 but it starting to get further from June 2024 to September 2024
+The data suggest no strong relationship between deprivation levels and rates of adults with high blood pressure readings but no diagnosis of hypertension.
 
-The confidence intervals are much tighter in this plot than those seen in the age-standardised hypertension prevalence (see @sec-age-standardised-prevalence), indicating there is much less uncertainty about these SII estimates.
+The Slope Index of Inequality (SII) values since March 2021 are small, ranging from -0.2% to 0.1%, indicating a weak relationship between deprivation and this metric. Additionally the large confidence intervals suggest that there is no clear linear relationship with increasing deprivation and this metric.
 
 ### Geography
 
@@ -4751,6 +4764,7 @@ icb_sf |>
   add_leaflet_polygon(report_period = "To March 2024") |> 
   add_leaflet_polygon(report_period = "To June 2024") |>
   add_leaflet_polygon(report_period = "To September 2024") |> 
+  add_leaflet_polygon(report_period = "To December 2024") |>
   leaflet::addLayersControl(
     baseGroups = poly_layers,
     options = leaflet::layersControlOptions(collapsed = FALSE)
@@ -4773,7 +4787,7 @@ This map presents a the SII for each ICB as a snapshot by each reporting period.
 
 -   blue means a positive SII, which is the area typically thought of as inequity of access where those who live in areas of highest deprivation have the lowest rates of high risk – one high blood pressure (no recorded hypertension).
 
-In June 2022 there is one ICB with an orange colour, Cambridgeshire and Peterborough ICB, indicating higher deprivation correlates with higher rates of high risk – one high blood pressure (no recorded hypertension) .
+In June 2022 there is one ICB with an orange colour, Cambridgeshire and Peterborough ICB, indicating higher deprivation correlates with higher rates of having a high blood pressure with no recorded diagnosis of hypertension.
 
 A small number of ICBs have yellow/light orange colours signifying more or less equality of access.
 
@@ -4856,11 +4870,9 @@ df |>
   )
 ```
 
-The main point to note from this chart is that potential antihypertensive overtreatment reached the highest percentage up to 0.5% of people aged 18+ over this period.
+The trend in potential antihypertensive overtreatment has been increasing over time, rising from 0.3% in March 2021 to a peak of 0.5% in both September and December 2024.
 
-The trend since March 2021 is upwards, Starting at 0.3% in March 2021 and peaking at 0.5% in September 2024
-
-Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 7.23 million (M) people in March 2021 to 9.03 M by September 2024.
+Meanwhile, the total number of people being monitored has also been growing, with the denominator increasing from 7.23 million in March 2021 to 9.12 million by September 2024.
 
 #### Gender
 
@@ -4899,9 +4911,11 @@ df |>
   )
 ```
 
-The trends for each gender are broadly similar to the overall trends noted above. Men tend to have a higher crude rate of potential antihypertensive overtreatment than woman for all reporting periods.
+The trends for men and women in terms of potential antihypertensive overtreatment are similar to the overall trends. However, there is a notable difference between the two genders:
 
-The denominators for both groups are broadly similar in each reporting period, however, there tend to be more men with hypertension than women. This fits with the national literature (see Section 2.1) that below the age of 65 years men tend to have higher blood pressure than women, with the inference than men are more likely to be diagnosed with hypertension.
+-   Men tend to have a higher rate of potential overtreatment than women for most reporting periods.
+
+-   The gap between the rates for men and women appear to be widening over time, with men's rates becoming increasingly higher than women's rates in subsequent reporting periods.
 
 #### Age
 
@@ -4941,16 +4955,6 @@ df |>
 ```
 
 There is a clear pattern demonstrated here that as age-group increases so too does the likelihood for potential antihypertensive overtreatment within limits. However, this relationship is not so nearly as strong as that observed between hypertension prevalence and age group (see @sec-national-trends).
-
-Despite this narrower gap in potential antihypertensive overtreatmentrate between the age groups except 80+, there are still notable differences in the denominators. In September 2024 the:
-
--   `60-79` age group had 4.73 M people in the denominator,
-
--   `40-59` age group had 2.21 M people in the denominator, around half of the `60-79` group,
-
--   `18-39` age group had only 0.22 M people in the denominator, around 4% of the `60-79` group.
-
-Use of the crude potential antihypertensive overtreatment rates appears to present fewer issues than it did when looking at hypertension prevalence. The age groups are much closer in their potential antihypertensive overtreatmentrates which means any differences in age profile between geographical areas are less likely to result in large effects on the overall potential antihypertensive overtreatment rate for the area.
 
 #### Ethnicity
 
@@ -5030,11 +5034,9 @@ df |>
   )
 ```
 
-There is a clear relationship between deprivation quintile and potential antihypertensive overtreatment. People living in areas of higher deprivation consistently achieve lower rates of potential antihypertensive overtreatment compared with those living in areas of least deprivation.
+There is a consistent relationship between deprivation levels and rates of potential antihypertensive overtreatment in which people living in areas with higher deprivation tend to have lower rates when compared with those living in areas of lower deprivation.
 
-Moreover, there appears to be a step-wise correlation between deprivation quintile and potential antihypertensive overtreatment, with people living in areas of higher deprivation less likely to achieve potential antihypertensive overtreatment.
-
-#### SMI
+#### MI
 
 ```{r}
 #| fig-height: 8
@@ -5073,7 +5075,7 @@ df |>
 
 There are only three reporting periods available for this relatively new metric, introduced in March 2024.
 
-It appears that people with a Serious Mental Illness are more likely to receive potential antihypertensive overtreatment than people without, (1% vs 0.5%, September 2024). However, the denominators show that there are far fewer people with SMI (131.50 k) than those without (8.9 M).
+It appears that people with a Serious Mental Illness are more likely to receive potential antihypertensive overtreatment than people without, (1% vs 0.5%, December 2024). However, the denominators show that there are far fewer people with SMI (133.26 k) than those without (8.9 M).
 
 #### LD
 
@@ -5112,7 +5114,7 @@ df |>
   )
 ```
 
-This metric was introduced in June 2023 illustrates that people with potential antihypertensive overtreatment who also have a Learning Disability are more likely to achieve potential antihypertensive overtreatment than those without (1.1% vs 0.5%, September 2024).
+This metric was introduced in June 2023 and illustrates that people with potential antihypertensive overtreatment who also have a Learning Disability are more at risk than those without (1% vs 0.5%, December 2024).
 
 #### Age ∩ Gender
 
@@ -5153,16 +5155,14 @@ plot_intersection_timeseries(
 )
 ```
 
-Women aged 18-39 and 40-59 are slightly more likely than men in these age groups to have potential antihypertensive overtreatment for their hypertension.
+Women aged 18-39 and 40-59 are slightly more likely than men in these age groups to have potential antihypertensive overtreatment.
 
-In the 60-70 age group, men is likely to have their potential antihypertensive overtreatment but women follow the same pattern.
-
-In the 80+ years age group we observe men are slightly more likely than women to have their potential antihypertensive overtreatment.
+This trend is reversed in the 60-70 and 80+ age groups, where we observe that men are slightly more likely than women to have potential antihypertensive overtreatment.
 :::
 
 ### Distributions over time
 
-potential antihypertensive overtreatment rates are distributed unevenly across ICBs, with some having lower rates and others higher rates in each reporting period.
+Potential antihypertensive overtreatment rates are distributed unevenly across ICBs, with some having lower rates and others higher rates in each reporting period.
 
 *Box-plots* provide one way to summarise distributions that allow comparisons across time, for example.
 
@@ -5251,6 +5251,14 @@ To appreciate how the SII applies to this measure here is an example slope as ca
 #| fig-height: 6
 #| fig-cap: Inequality of crude rate of potential antihypertensive overtreatment by deprivation quintile - example month
 
+# get the latest reporting period name
+temp_time_period <- 
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::pull(time_period_name) |> 
+  unique() |> 
+  stringr::str_remove(pattern = "To ")
+
 # get the latest reporting period
 df <-
   df_dep_eng |> 
@@ -5318,12 +5326,12 @@ df |>
   ) |> 
   plotly::add_annotations(
     x = ~ 3,
-    y = ~ 1.5,
+    y = ~ 0.4,
     text = glue::glue("<b>Slope Index of Inequality</b>\n{round(df_sii$estimate, digits = 1)}%"),
     showarrow = FALSE
   ) |> 
   plotly::layout(
-    title = "Crude potential antihypertensive overtreatment - September 2024",
+    title = glue::glue("Crude potential antihypertensive overtreatment - {temp_time_period}"),
     font = plotly_font_family,
     legend = list(orientation = "h"),
     xaxis = list(title = ""),
@@ -5410,9 +5418,13 @@ df |>
   configure_plotly()
 ```
 
-There was a general flat trend of inequality between March 2021 and September 2024.The points were consistently showing -0.1 overtime.However, a little improvement was observed in September 2022 before it decrease again.
+The data shows that the trend of inequality in this measure has been relatively stable over time, with:
 
-The confidence intervals are much tighter in this plot than those seen in the age-standardised hypertension prevalence (see @sec-age-standardised-prevalence), indicating there is much less uncertainty about these SII estimates.
+-   A generally flat trend between March 2021 and December 2024, indicating little change in inequality.
+
+-   An average SII of only 0.15% over this period, which is a very small value.
+
+Overall, these findings suggest that this measure is unaffected by deprivation levels, and has remained relatively consistent over the time series.
 
 ### Geography
 
@@ -5533,6 +5545,7 @@ icb_sf |>
   add_leaflet_polygon(report_period = "To March 2024") |> 
   add_leaflet_polygon(report_period = "To June 2024") |>
   add_leaflet_polygon(report_period = "To September 2024") |> 
+  add_leaflet_polygon(report_period = "To December 2024") |> 
   leaflet::addLayersControl(
     baseGroups = poly_layers,
     options = leaflet::layersControlOptions(collapsed = FALSE)
@@ -5554,16 +5567,6 @@ This map presents a the SII for each ICB as a snapshot by each reporting period.
 -   yellow means an SII equal to or around zero, which means greater equity of potential antihypertensive overtreatment with respect to deprivation, and
 
 -   blue means a positive SII, which is the area typically thought of as inequity of access where those who live in areas of highest deprivation have the lowest rates of potential antihypertensive overtreatment.
-
-In June 2022 there were four ICB with an orange colour, indicating higher deprivation correlates with greater equity of potential antihypertensive overtreatment .
-
-A small number of ICBs have yellow/light orange colours signifying more or less equality of access.
-
-The majority of ICBs appear to be coloured various shades of yellow, indicating they have still great equity of potential antihypertensive overtreatment) with respect to deprivation.
-
-By March 2023 nearly all ICBs have no significant improvement compared the previous year but the orange colour dominated the area in the north of England.
-
-In June 2024 and September 2024 the colour is still the same like March 2023 indicating that the inequity has not dissapear after a year .
 
 #### Focal ICBs
 
@@ -5642,11 +5645,13 @@ df |>
   )
 ```
 
-The main point to note from this chart is that GP hypertension treated to appropriate threshold reached the highest percentage up to 70.9% of people aged 18+ over this period.
+The proportion of people aged 18+ with GP-treated hypertension reaching the appropriate threshold has been increasing over time.
 
-The trend since March 2022 is upwards, Starting at 60% in March 2022 and peaking at 70.9% in March 2024
+-   The rate reached a peak of 70.9% in March 2024.
 
-Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 7.46 million (M) people in March 2022 to 8.95 M by September 2024.
+-   The trend has been upward, starting at 60% in March 2022 and achieving 67.2% in December 2024.
+
+-   Meanwhile, the total number of people being monitored has been growing, with the denominator increasing from 7.46 million in March 2022 to 9.04 million in December 2024.
 
 #### Gender
 
@@ -5685,9 +5690,7 @@ df |>
   )
 ```
 
-The trends for each gender are broadly similar to the overall trends noted above. Woman tend to have a higher crude rate of treated to appropriate threshold than men for all reporting periods.
-
-The denominators for both groups are broadly similar in each reporting period, however, there tend to be more women with hypertension than men. This does not fit with the national literature (see Section 2.1) that below the age of 65 years men tend to have higher blood pressure than women, with the inference than men are more likely to be diagnosed with hypertension.
+The trends for each gender are broadly similar to the overall trends noted above. Women tend to be more likely to be treated to appropriate threshold than men for all reporting periods.
 
 #### Age
 
@@ -5726,15 +5729,17 @@ df |>
   )
 ```
 
-There is a clear pattern demonstrated here that as age-group increases so too does the likelihood for potential treated to appropriate threshold within limits. However, this relationship is not so nearly as strong as that observed between hypertension prevalence and age group (see @sec-national-trends).
+There is a clear pattern demonstrated here that as age-group increases so too does the likelihood for potential treated to appropriate threshold. However, this relationship is not so nearly as strong as that observed between hypertension prevalence and age group (see @sec-national-trends).
 
-Despite this narrower gap in treated to appropriate threshold between the age groups, there are still notable differences in the denominators. In September 2024 the:
+Despite this narrower gap between the age groups, there are still notable differences in the denominators. In December 2024 the:
 
--   `60-79` age group had 4.69 M people in the denominator,
+-   `80+` age group had 1.88 million people in the denominator,
 
--   `40-59` age group had 2.18 M people in the denominator, around half of the `60-79` group,
+-   `60-79` age group had 4.73 million people in the denominator,
 
--   `18-39` age group had only 0.21 M people in the denominator, around 4% of the `60-79` group.
+-   `40-59` age group had 2.21 million people in the denominator, around half of the `60-79` group,
+
+-   `18-39` age group had only 0.22 million people in the denominator, around 4% of the `60-79` group.
 
 Use of the crude treated to appropriate threshold rates appears to present fewer issues than it did when looking at hypertension prevalence. The age groups are much closer in their treated to appropriate threshold which means any differences in age profile between geographical areas are less likely to result in large effects on the overall treated to appropriate threshold rate for the area.
 
@@ -5776,8 +5781,6 @@ df |>
 ```
 
 The relationship between ethnicity and treated to appropriate threshold is not clear from this visualisation.
-
-There are disparities with some groups recording consistently lower rates, such as people with a `Black` broad ethnic background as well as those whose ethnicity is `Missing` from their GP record or who refused to provide this information for their GP record (`Not stated`), in contrast to people of `Asian` or `White` broad ethnic backgrounds who generally appear to achieve higher rates of treated to appropriate threshold.
 
 #### Deprivation
 
@@ -5859,7 +5862,7 @@ df |>
 
 There are only three reporting periods available for this relatively new metric, introduced in March 2024.
 
-It appears that people with a Serious Mental Illness are more likely to be treated to appropriate threshold without, (68.6% vs 66.8%, September 2024). However, the denominators show that there are far fewer people with SMI (0.13 M) than those without (8.8 M).
+It appears that people with a Serious Mental Illness are more likely to be treated to appropriate threshold without, (68.7% vs 67.1%, December 2024). However, the denominators show that there are far fewer people with SMI (0.13 million) than those without (8.8 million).
 
 #### LD
 
@@ -5898,7 +5901,7 @@ df |>
   )
 ```
 
-This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to achieve treated to appropriate threshold than those without (70.7% vs 66.8%, September 2024).
+This metric was introduced in June 2023 illustrates that people with hypertension who also have a Learning Disability are more likely to achieve treated to appropriate threshold than those without (70.4% vs 67.2%, December 2024).
 
 #### Age ∩ Gender
 
@@ -5939,11 +5942,13 @@ plot_intersection_timeseries(
 )
 ```
 
-Women aged 18-39 and 40-59 are slightly more likely than men in these age groups to have treated to appropriate threshold for their hypertension.
+The likelihood of being treated to the appropriate threshold for hypertension varies by age group and gender:
 
-In the 60-70 age group both genders are equally likely to be treated to appropriate threshold.
+-   In the younger age groups (18-39 and 40-59), women are slightly more likely than men to receive appropriate treatment.
 
-In the 80+ years age group we observe men are slightly more likely than women to be treated to appropriate threshold.
+-   In the 60-70 age group, men and women are equally likely to receive appropriate treatment.
+
+-   In the oldest age group (80+ years), men are slightly more likely than women to receive appropriate treatment, reversing the trend seen the younger age groups.
 :::
 
 ### Distributions over time
@@ -6037,6 +6042,14 @@ To appreciate how the SII applies to this measure here is an example slope as ca
 #| fig-height: 6
 #| fig-cap: Inequality of crude rate of treated to appropriate threshold (18+) by deprivation quintile - example month
 
+# get the latest reporting period name
+temp_time_period <- 
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::pull(time_period_name) |> 
+  unique() |> 
+  stringr::str_remove(pattern = "To ")
+
 # get the latest reporting period
 df <-
   df_dep_eng |> 
@@ -6104,12 +6117,12 @@ df |>
   ) |> 
   plotly::add_annotations(
     x = ~ 3,
-    y = ~ 1.5,
+    y = ~ 58,
     text = glue::glue("<b>Slope Index of Inequality</b>\n{round(df_sii$estimate, digits = 1)}%"),
     showarrow = FALSE
   ) |> 
   plotly::layout(
-    title = "Crude  treated to appropriate threshold (18+) - September 2024",
+    title = glue::glue("Crude  treated to appropriate threshold (18+) - {temp_time_period}"),
     font = plotly_font_family,
     legend = list(orientation = "h"),
     xaxis = list(title = ""),
@@ -6249,7 +6262,6 @@ if (params$flag_calc_expensive_operations) {
 # wrangling ---
 
 # read the pre-processed icb sii file
-# read the pre-processed icb sii file
 df_sii <-
   readRDS(
     file = here::here('data', 'project', 'df_dep_icb_sii_p007.Rds')
@@ -6321,6 +6333,7 @@ icb_sf |>
   add_leaflet_polygon(report_period = "To March 2024") |> 
   add_leaflet_polygon(report_period = "To June 2024") |>
   add_leaflet_polygon(report_period = "To September 2024") |> 
+  add_leaflet_polygon(report_period = "To December 2024") |> 
   leaflet::addLayersControl(
     baseGroups = poly_layers,
     options = leaflet::layersControlOptions(collapsed = FALSE)
@@ -6351,7 +6364,7 @@ The majority of ICBs appear to be coloured various shades of blue, indicating th
 
 By March 2023 nearly all ICBs are coloured blue with a few coloured deeper blue, indicating greater inequity of access for people living in areas of highest deprivation.
 
-In June 2024 and September 2024 the darker blue is replaced by more lighter shades indicating that inequity still exists but to a lesser extent than the peak of March 2023.
+In June, September and December 2024 the darker blue is replaced by more lighter shades indicating that inequity still exists but to a lesser extent than the peak of March 2024.
 
 #### Focal ICBs
 
@@ -6370,11 +6383,9 @@ plot_list <-
 plot_list
 ```
 
-
 ## CVDP009HYP
 
 This metric looks at the percentage of patients aged 18 and over, with GP recorded hypertension (excluding patients with chronic kidney disease (CKD) (G3a to G5)), with a record of a urine albumin:creatinine ratio (ACR) or protein:creatinine ratio (PCR) test in the preceding 12 months. atment threshold.
-
 
 Breakdowns of England-wide hypertension treated to threshold as unadjusted rates are available by:
 
@@ -6426,11 +6437,9 @@ df |>
   )
 ```
 
-The main point to note from this chart is that hypertension monitoring with ACR reached the highest percentage up to 29.8% of people aged 18+ over this period.
+Hypertension monitoring with ACR showed a trend for increasing rates since the introduction of this measure in March 2024. The rate reached 31.1% in December 2024, having started at 28.6% in March 2024.
 
-The trend since March 2022 is upwards, Starting at 28.6% in March 2024 and peaking at 70.9% in September 2024
-
-Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 6.85 million (M) people in March 2024 to 7.4 M by September 2024.
+Throughout this time-series we observe an increasing denominator over successive reporting periods, starting from 6.85 million people in March 2024 to 7.47 million by December 2024.
 
 #### Gender
 
@@ -6469,9 +6478,7 @@ df |>
   )
 ```
 
-The trends for each gender are broadly similar to the overall trends noted above. Men tend to have a higher crude rate of treated to appropriate threshold than Woman for all reporting periods.
-
-The denominators for both groups are broadly similar in each reporting period.This does not fit with the national literature (see Section 2.1) that below the age of 65 years men tend to have higher blood pressure than women, with the inference than men are more likely to be diagnosed with hypertension.
+The trends for each gender are broadly similar to the overall trends noted above. Men tend to have a higher crude rate of treated to appropriate threshold than women for all reporting periods.
 
 #### Age
 
@@ -6510,17 +6517,21 @@ df |>
   )
 ```
 
-There is a clear pattern demonstrated here that as age-group increases so too does the likelihood for hypertension monitoring ACR within limits. However, this relationship is not so nearly as strong as that observed between hypertension prevalence and age group (see @sec-national-trends).
+This data shows a trend of increasing rates of hypertension monitoring with Albumin-to-Creatinine Ratio (ACR) as age increases, but with a notable exception in the oldest age group.
 
-Despite this narrower gap in treated to appropriate threshold between the age groups, there are still notable differences in the denominators. In September 2024 the:
+-   The rates of ACR monitoring are higher in older age groups, but then decrease in the 80+ years group.
 
--   `60-79` age group had 4 M people in the denominator,
+-   By December 2024, the rates of ACR monitoring are:
 
--   `40-59` age group had 2.1 M people in the denominator, around half of the `60-79` group,
+    -   33.7% for people aged 60-79 (out of 4.04 million people)
 
--   `18-39` age group had only 0.21 M people in the denominator, around 5.25% of the `60-79` group.
+    -   29.5% for people aged 80+ years (out of 1.10 million people)
 
-Use of the crude hypertension monitoring with ACR rates appears to present fewer issues than it did when looking at hypertension prevalence. The age groups are much closer in their hypertension monitoring with ACR which means any differences in age profile between geographical areas are less likely to result in large effects on the overall hypertension monitoring with ACR rate for the area.
+    -   27.7% for people aged 40-59 years (out of 2.12 million people)
+
+    -   23.3% for people aged 18-39 years (out of 0.21 million people).
+
+This suggests that ACR monitoring is more common in older adults, but there may be a decline in monitoring rates in the very oldest age group.
 
 #### Ethnicity
 
@@ -6559,9 +6570,9 @@ df |>
   )
 ```
 
-The relationship between ethnicity and treated to appropriate threshold is not clear from this visualisation.
+The data reveal disparities in the rates of people monitoring their hypertension with ACR, with some groups consistently recording lower rates.
 
-There are disparities with some groups recording consistently lower rates, such as people with a `Missing` broad ethnic background as well as those whose ethnicity is `Mixed` from their GP record or who refused to provide this information for their GP record (`Not stated`), in contrast to people of `Asian` or `Other` broad ethnic backgrounds who generally appear to achieve higher rates of treated to appropriate threshold.
+Notably, people with a recorded ethnicity of `Missing` or `Not stated` (where ethnicity information is not available or not provided) tend to have lower rates of monitoring with ACR. In contrast, individuals who identify as `Asian` generally have higher rates of monitoring with ACR.
 
 #### Deprivation
 
@@ -6600,9 +6611,7 @@ df |>
   )
 ```
 
-There is a clear relationship between deprivation quintile and hypertension monitoring with ACR. People living in areas of least deprived area consistently achieve lower rates of hypertension monitoring with ACR compared with those living in areas of most deprived area.
-
-Moreover, there appears to be a step-wise correlation between deprivation quintile and hypertension monitoring with ACR, with people living in areas of higher deprivation less likely to get hypertension monitoring with ACR.
+People living in areas of least deprived area consistently achieve lower rates of hypertension monitoring with ACR compared with those living in areas of most deprived area.
 
 #### SMI
 
@@ -6641,9 +6650,9 @@ df |>
   )
 ```
 
-There are only three reporting periods available for this relatively new metric, introduced in March 2024.
+There are only four reporting periods available for this relatively new metric, introduced in March 2024.
 
-It appears that people without a Serious Mental Illness are more likely to be monitored with ACR with, (29.8% vs 28.4%, September 2024). However, the denominators show that there are far fewer people with SMI (0.1 M) than those without (7.28 M).
+It appears that people without a Serious Mental Illness are more likely to be monitored with ACR with, (31.1% vs 29.7%, December 2024). However, the denominators show that there are far fewer people with SMI (0.1 million people) than those without (7.28 million people).
 
 #### LD
 
@@ -6682,7 +6691,7 @@ df |>
   )
 ```
 
-This metric was introduced in June 2023 illustrates that people without hypertension who also have a Learning Disability are more likely to get hypertension monitoring with ACR than those with (29.8% vs 26.8%, September 2024).
+This metric was introduced in March 2024 and illustrates that people with hypertension who also have a Learning Disability are more likely to be monitored with ACR than those without (31.1% vs 28.1%, December 2024).
 
 #### Age ∩ Gender
 
@@ -6723,7 +6732,7 @@ plot_intersection_timeseries(
 )
 ```
 
-Men for all age groups are more likely than women to have routine ACR for their hypertension.
+Men of all age groups are more likely than women to have their hypertension routinely monitored using ACR.
 
 :::
 
@@ -6818,6 +6827,14 @@ To appreciate how the SII applies to this measure here is an example slope as ca
 #| fig-height: 6
 #| fig-cap: Inequality of crude rate of hypertension monitoring with ACR by deprivation quintile - example month
 
+# get the latest reporting period name
+temp_time_period <- 
+  df_dep_eng |> 
+  dplyr::slice_max(order_by = time_period_month) |> 
+  dplyr::pull(time_period_name) |> 
+  unique() |> 
+  stringr::str_remove(pattern = "To ")
+
 # get the latest reporting period
 df <-
   df_dep_eng |> 
@@ -6885,12 +6902,12 @@ df |>
   ) |> 
   plotly::add_annotations(
     x = ~ 3,
-    y = ~ 1.5,
+    y = ~ 27,
     text = glue::glue("<b>Slope Index of Inequality</b>\n{round(df_sii$estimate, digits = 1)}%"),
     showarrow = FALSE
   ) |> 
   plotly::layout(
-    title = "Crude hypertension monitoring with ACR - September 2024",
+    title = glue::glue("Crude hypertension monitoring with ACR - {temp_time_period}"),
     font = plotly_font_family,
     legend = list(orientation = "h"),
     xaxis = list(title = ""),
@@ -6977,9 +6994,9 @@ df |>
   configure_plotly()
 ```
 
-There was a general trend of increasing inequality between March 2024 and September 2024, from -5.1% to -4.4%.
+The data shows a temporary improvement in equality monitoring hypertension using ACR between between March 2024 and June 2024. 
 
-The confidence intervals are much tighter in this plot than those seen in the age-standardised hypertension prevalence (see @sec-age-standardised-prevalence), indicating there is much less uncertainty about these SII estimates.
+The SII improved from -5.1 in March 2024 to -4.3 in June 2024, indicating a reduction in inequality. However, this improvement was not sustained, as the SII worsened to -4.4 in September 2024 and -5 in December 2024, suggesting the initial progress in reducing inequality was reversed.
 
 ### Geography
 
@@ -7026,7 +7043,6 @@ if (params$flag_calc_expensive_operations) {
 
 # wrangling ---
 
-# read the pre-processed icb sii file
 # read the pre-processed icb sii file
 df_sii <-
   readRDS(
@@ -7089,16 +7105,10 @@ poly_layers <- c()
 # build the map
 icb_sf |> 
   leaflet::leaflet() |> 
-  # add_leaflet_polygon(report_period = "To June 2022") |>
-  # add_leaflet_polygon(report_period = "To September 2022") |>
-  # add_leaflet_polygon(report_period = "To December 2022") |>
-  # add_leaflet_polygon(report_period = "To March 2023") |> 
-  # add_leaflet_polygon(report_period = "To June 2023") |> 
-  # add_leaflet_polygon(report_period = "To September 2023") |> 
-  # add_leaflet_polygon(report_period = "To December 2023") |> 
   add_leaflet_polygon(report_period = "To March 2024") |> 
   add_leaflet_polygon(report_period = "To June 2024") |>
   add_leaflet_polygon(report_period = "To September 2024") |> 
+  add_leaflet_polygon(report_period = "To December 2024") |> 
   leaflet::addLayersControl(
     baseGroups = poly_layers,
     options = leaflet::layersControlOptions(collapsed = FALSE)
@@ -7113,21 +7123,18 @@ icb_sf |>
   )
 ```
 
-
 This map presents a the SII for each ICB as a snapshot by each reporting period. The colours range from red-yellow-blue, where generally:
-  
-  -   red means a negative SII, which is where people with hypertension who live in areas of greater deprivation have higher rates of treated to appropriate threshold ,
+
+-   red means a negative SII, which is where people with hypertension who live in areas of greater deprivation have higher rates of treated to appropriate threshold ,
 
 -   yellow means an SII equal to or around zero, which means greater equity of treated to monitored ACR with respect to deprivation, and
 
 -   blue means a positive SII, which is the area typically thought of as inequity of access where those who live in areas of highest deprivation have the lowest rates of hypertension monitoring with ACR.
 
+In March 2024 there are some ICBs with a red colour, indicating those who live in areas of higher deprivation are more likely to be monitored using ACR. Two examples include Birmingham and Solihull ICB and South West London ICB, indicating higher deprivation correlates with higher rates of monitoring with ACR.
 
-In March 2024 there are two ICBs with a red colour, Birmingham and Solihull ICB and South West London ICB, indicating higher deprivation correlates with higher rates of treated to appropriate threshold .
+Some ICBs are coloured various shades of blue, indicating they have inequity in which those who live in areas of higher deprivation have lower rates of monitoring with ACR.
 
-The minority of ICBs appear to be coloured various shades of blue, indicating they have inequity in which those who live in areas of higher deprivation have lower rates of treatment to appropriate threshold.
-
-In June 2024 and September 2024 the orange is replaced by more yellow indicating that inequity still exists but to a lesser extent than the peak of March 2024.
 
 #### Focal ICBs
 
